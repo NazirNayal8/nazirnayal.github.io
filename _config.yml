@@ -58,7 +58,7 @@ yandex_site_verification :
 # Social Sharing
 twitter:
   username               : &twitter "NayalNazir"
-facebook: 
+facebook:
   username               : "Nazir Nayal"
   app_id                 :
   publisher              :
@@ -85,7 +85,7 @@ author:
   bio              : "Computer Engineering Student at Koc University"
   location         : "Istanbul, Turkey"
   employer         :
-  pubmed           : 
+  pubmed           :
   googlescholar    : "https://scholar.google.com/citations?user=CVYjW50AAAAJ&hl=en"
   email            : "nnayal17@ku.edu.tr"
   researchgate     : "https://www.researchgate.net/profile/Nazir_Nayal"
@@ -187,6 +187,9 @@ collections:
   talks:
     output: true
     permalink: /:collection/:path/
+  blogs:
+    output: true
+    permalink: /:collection/:path/
 
 
 # Defaults
@@ -255,7 +258,7 @@ sass:
 permalink: /:categories/:title/
 # paginate: 5 # amount of posts to show
 # paginate_path: /page:num/
-timezone: America/Los_Angeles # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone: Asia/Istanbul # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 
 # Plugins
