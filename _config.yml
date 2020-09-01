@@ -244,7 +244,7 @@ defaults:
       path: ""
       type: blogs
     values:
-      layout: blogs
+      layout: single
       author_profile: true
       share: true
 
