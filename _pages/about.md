@@ -3,9 +3,9 @@ permalink: /
 title: "About me"
 excerpt: "About me"
 author_profile: true
-redirect_from: 
+redirect_from:
   - /about/
   - /about.html
 ---
 
-Hi, I'm a Computer Engineering Student at Koc University.
+I am a Computer Engineering Student at Koc University.
