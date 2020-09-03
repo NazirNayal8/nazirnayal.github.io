@@ -194,8 +194,6 @@ collections:
     output: true
     permalink: /:collection/:path/
 
-
-
 # Defaults
 defaults:
   # _pages
