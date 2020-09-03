@@ -1,6 +1,6 @@
 ---
 title: "Amazon Food Review Sentiment Analysis"
-excerpt: "NLP"
+excerpt: "nlp"
 collection: projects
 permalink: /projects/amazon_review_sentiment
 ---
