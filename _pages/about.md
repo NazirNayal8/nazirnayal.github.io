@@ -8,4 +8,5 @@ redirect_from:
   - /about.html
 ---
 
-I am a Computer Engineering Student at Koc University.
+I am a Computer Engineering Senior at Koç University in Istanbul, Turkey. Interested in
+Machine Learning and Software Engineering Research. 
