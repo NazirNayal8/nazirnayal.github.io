@@ -1,7 +1,7 @@
 ---
 title: "A containerized proof-of-concept implementation of LightChain system"
 collection: publications
-permalink: /publication/lightchain_poc
+permalink: /publications/lightchain_poc
 excerpt: #''
 date: 2020-05-06
 venue: 'IEEE International Conference on Blockchain and Cryptocurrency'
@@ -11,7 +11,11 @@ citation: #'Y. Hassanzadeh-Nazarabadi, N. Nayal, S. Sameh Hamdan, Ö. Özkasap, 
 
 This publication features our implementation of proof of concept of LightChain System.
 
+## Download
+
 [Download paper here](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9169463)
-Recommended citation:
+
+## Recommended citation:
+
 * Hassanzadeh-Nazarabadi, N. Nayal, S. Sameh Hamdan, Ö. Özkasap, and A. Küpçü, “A containerized
 proof-of-concept implementation of lightchain system,” in ICBC. IEEE, 2020.
