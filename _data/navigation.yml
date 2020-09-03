@@ -1,20 +1,20 @@
 # main links links
 main:
-  
-  - title: "Work Experience"
-    url: /work_experience/    
+
+  - title: "Experience"
+    url: /experience/
 
   - title: "Research"
-    url: /research/    
+    url: /research/
 
   - title: "Publications"
     url: /publications/
-      
+
   - title: "CV"
     url: /cv/
-    
-  - title: "Non-Academic Interests"
-    url: /nonacademic/
-        
+
+  - title: "Interests"
+    url: /interests/
+
   - title: "Blogs"
     url: /blogs/

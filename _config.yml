@@ -57,7 +57,7 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               : &twitter "NayalNazir"
+  username               : &twitter # "NayalNazir"
 facebook:
   username               : "Nazir Nayal"
   app_id                 :
@@ -109,7 +109,7 @@ author:
   stackoverflow    : # http://stackoverflow.com/users/123456/username
   steam            :
   tumblr           :
-  twitter          : "NayalNazir"
+  twitter          : # "NayalNazir"
   vine             :
   weibo            :
   xing             :
@@ -175,16 +175,16 @@ kramdown:
 
 # Collections
 collections:
-  teaching:
+  research:
     output: true
     permalink: /:collection/:path/
   publications:
     output: true
     permalink: /:collection/:path/
-  portfolio:
+  experience:
     output: true
     permalink: /:collection/:path/
-  talks:
+  interests:
     output: true
     permalink: /:collection/:path/
   blogs:

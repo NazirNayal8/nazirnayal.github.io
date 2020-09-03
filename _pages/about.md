@@ -8,5 +8,5 @@ redirect_from:
   - /about.html
 ---
 
-I am a Computer Engineering Senior at Koç University in Istanbul, Turkey. Interested in
-Machine Learning and Software Engineering Research. 
+I am a Computer Engineering Senior at Koç University and a recipient of
+Abdullah . 
