@@ -17,4 +17,4 @@ cool research projects.
 My academic interests generally include software engineering design, algorithm & data structures, machine learning, and data science.
 
 Aside from academia, I'm an active competitive programmer. I continuously participate in
-online rounds hosted on [codeforces.com](https://codeforces.com/) and [atcoder.jp](https://atcoder.jp/home).
+online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](https://atcoder.jp/home).
