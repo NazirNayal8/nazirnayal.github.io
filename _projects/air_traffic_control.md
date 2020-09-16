@@ -3,6 +3,12 @@ title: "Air Traffic Control Simulation"
 excerpt: Simulating air traffic control in an airport modeled as a resource allocation problem.
 collection: projects
 permalink: /projects/air_traffic_control
+categories:
+  - projects
+tags:
+  - University Course
+  - Multi-Threading
+  - Operating Systems
 ---
 
 ## Code
