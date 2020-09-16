@@ -38,6 +38,7 @@ and refining the model's performance by tuning different parameters and doing fu
 * Usage of Gradient Boosting algorithms such as XGBoost and Light GBM.
 * Hyperparameter optimization.
 * Creating and evaluating Machine Learning ensemble models.
+* Improved my python skills.
 
 ## Challenges Faced
 
