@@ -1,6 +1,6 @@
 ---
 title: "Air Traffic Control Simulation"
-excerpt: "Operating Systems Course"
+excerpt: "Operating Systems Course Project. Simulating air traffic control in an airport modeled as a resource allocation problem."
 collection: projects
 permalink: /projects/air_traffic_control
 ---
