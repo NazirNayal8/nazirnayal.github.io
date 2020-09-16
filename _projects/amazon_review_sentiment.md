@@ -13,3 +13,10 @@ tags:
 ---
 
 ## Code
+
+The code is available on github [here](https://github.com/NazirNayal8/amazon-food-review-text-classification).
+
+## About
+
+
+## Implementation
