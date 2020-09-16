@@ -40,9 +40,9 @@ so much fun. My interest in NLP grew significantly after this experience.
 
 ## What is LSTM ?
 
-A variation [Recurrent Neural Networks (RNNs)](https://en.wikipedia.org/wiki/Recurrent_neural_network) which is capable of learning long-term dependencies of sequenced data (Hence the Abbreviation <u>L</u>ong <u>S</u>hort <u>T</u>erm <u>M<u>emory.
+A variation [Recurrent Neural Networks (RNNs)](https://en.wikipedia.org/wiki/Recurrent_neural_network) which is capable of learning long-term dependencies of sequenced data (Hence the Abbreviation <u>L</u>ong <u>S</u>hort <u>T</u>erm <u>M</u>emory.
 
-  ![LSTM](images/lstm.png)
+  ![LSTM](../images/lstm.png)
 
 ## Packages Used
 
