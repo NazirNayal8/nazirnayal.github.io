@@ -1,6 +1,6 @@
 ---
 title: "Amazon Food Review Sentiment Analysis"
-excerpt: "Advanced Data Science Course Project. Mult-Label Text Classification using LSTM Neural Network."
+excerpt: Multi-Label Text Classification using LSTM Neural Network. Advanced Data Science Course Project.
 collection: projects
 permalink: /projects/amazon_review_sentiment
 ---
