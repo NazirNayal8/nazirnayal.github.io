@@ -14,10 +14,10 @@ I am a Computer Engineering Senior at Koç University and a recipient of
 I am also a member of the Distributed Systems and Reliable Networks Laboratory (DISNET) at Koç University, where I am working on several
 cool research projects.
 
-My academic interests generally include
+My academic interests generally include:
 * Machine Learning
 * Deep learning for NLP and Computer Vision
-* Data Science,
+* Data Science
 * Algorithm & Data Structures
 * Software Engineering Design.
 
@@ -30,4 +30,4 @@ I am currently in the process of applying for my masters degree. My targeted res
 
 * Machine Learning and Data Science Applications.
 * Using Deep Learning in Natural Language Processing and Computer Vision.
-* Interdisciplinary Applications of Machine Learning in Cyber-Security and Business Analytics. 
+* Interdisciplinary Applications of Machine Learning in Cyber-Security and Business Analytics.
