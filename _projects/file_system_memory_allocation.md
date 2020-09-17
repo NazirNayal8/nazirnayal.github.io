@@ -18,7 +18,7 @@ tags:
 The code is available on github [here](https://github.com/NazirNayal8/file-system-space-allocation-analysis).
 
 ## Skills
-
+---
 * C++
 * Algorithms
 * Memory Allocation
