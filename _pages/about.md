@@ -28,6 +28,6 @@ online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](http
 
 I am currently in the process of applying for my masters degree. My targeted research topics are:
 
-* Developing Machine Learning models to solve real-life problems.
+* Developing interdisciplinary machine learning models to solve real-life problems.
 * Applications Deep Learning in Natural Language Processing and Computer Vision.
-* Interdisciplinary Applications of Machine Learning in Cyber-Security and Business Analytics.
+* Developing Algorithms and Data Structures to solve real-life problems.
