@@ -1,6 +1,6 @@
 ---
 title: "Bricking Bad: Brick Breaking Game"
-excerpt: "Software Engineering Course"
+excerpt: "An exciting desktop game with bricks, aliens, power-ups, and more interesting stuff."
 collection: projects
 permalink: /projects/bricking_bad
 date: 2019-12-28
