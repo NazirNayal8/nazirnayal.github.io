@@ -42,6 +42,8 @@ destroying all the bricks on the map.
 The game starts with a ball placed on the paddle. Then the ball can be fired towards the bricks and it can be bounced of bricks or destroy them depending on their type.
 The player must not let the ball fall beyond the paddle, and if it does, the player loses a life. The game is over when the player loses all the lives and the there are still some unbroken bricks. The player wins win all bricks are destroyed.
 
+In addition, there are several power-ups that can be used by the player to increase the performance of the ball or paddle. This whole combination of different bricks, aliens and power-ups makes it a simple yet challenging game to play.
+
 ![Bricking Bad Overview](../images/bricking_bad_1.png)
 
 ![Bricking Bad Overview](../images/bricking_bad_2.png)
