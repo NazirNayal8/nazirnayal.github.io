@@ -7,7 +7,7 @@ author_profile: true
 
 My current research interests can be summarized as follows:
 
-* Developing Machine Learning Interdisciplinary models to solve real-life problems.
+* Developing interdisciplinary machine learning models to solve real-life problems.
 * Applications Deep Learning in Natural Language Processing and Computer Vision.
 * Developing Algorithms and Data Structures to solve real-life problems.
 
