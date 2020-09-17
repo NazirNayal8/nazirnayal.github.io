@@ -5,7 +5,7 @@ collection: projects
 permalink: /projects/amazon_review_sentiment
 date: 2020-05-25
 categories:
-  - project
+  - University Project
 tags:
   - Deep Learning
   - Neural Network

@@ -5,7 +5,7 @@ collection: projects
 permalink: /projects/air_traffic_control
 date: 2020-04-01
 categories:
-  - projects
+  - University Project
 tags:
   - University Course
   - Multi-Threading
