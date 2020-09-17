@@ -24,10 +24,10 @@ My academic interests generally include:
 Aside from academia, I'm an active competitive programmer. I continuously participate in
 online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](https://atcoder.jp/home).
 
-## Current Directions
+# Current Directions
 
 I am currently in the process of applying for my masters degree. My targeted research topics are:
 
-* Machine Learning and Data Science Applications.
-* Using Deep Learning in Natural Language Processing and Computer Vision.
+* Developing Machine Learning models to solve real-life problems.
+* Applications Deep Learning in Natural Language Processing and Computer Vision.
 * Interdisciplinary Applications of Machine Learning in Cyber-Security and Business Analytics.

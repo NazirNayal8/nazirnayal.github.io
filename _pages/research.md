@@ -5,17 +5,17 @@ permalink: /research/
 author_profile: true
 ---
 
-My research interests can be summarized as follows:
+My current research interests can be summarized as follows:
 
-* Machine Learning and Data Science applications in real-life problems (NLP, Comp. Vision, Forecasting).
-* Design of Algorithms and Data Structures to solve computational and constrained problems.
-* Developing software architectures to optimize system performance.
+* Developing Machine Learning models to solve real-life problems.
+* Applications Deep Learning in Natural Language Processing and Computer Vision.
+* Interdisciplinary Applications of Machine Learning in Cyber-Security and Business Analytics.
 
-# Current Affiliations
+## Current Affiliations
 
 I am a member in the Distributed Systems and Reliable Networks Laboratory at Koç University (DISNET).
 
-# Active Projects
+## Active Projects
 
 ### Skip Graph Middleware (DISNET Lab)
 
@@ -32,7 +32,7 @@ Systems applications with metrics monitoring and protocol agnostic underlay.
 A continuation to a previous project where we are adding extra features and
 validing performance of LightChain.
 
-# Previous Projects
+## Previous Projects
 
 ### LightChain Proof of Concept Implementation (DISNET Lab)
 
