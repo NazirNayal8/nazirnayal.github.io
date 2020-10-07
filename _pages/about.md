@@ -31,3 +31,7 @@ I am currently in the process of applying for my masters degree. My targeted res
 * Developing interdisciplinary machine learning models to solve real-life problems.
 * Applications Deep Learning in Natural Language Processing and Computer Vision.
 * Developing Algorithms and Data Structures to solve real-life problems.
+
+# News
+* `12/09/2020` Finished Algorithm Competition League at rank 4.
+* `01/09/2020` Finished my summer internship at Invent Analytics.
