@@ -24,5 +24,5 @@ Skip Graph Middleware Implementation”, in SRDS 2020.
 ## Presentation
 
 <iframe width="420" height="315"
-src="https://www.youtube.com/watch?v=3idPrp5-TBM&t=28s">
+src="https://www.youtube.com/embed?v=3idPrp5-TBM&t=28s">
 </iframe>

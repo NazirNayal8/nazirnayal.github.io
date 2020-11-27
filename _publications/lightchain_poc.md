@@ -24,5 +24,5 @@ proof-of-concept implementation of lightchain system,” in ICBC. IEEE, 2020.
 ## Presentation
 
 <iframe width="420" height="315"
-src="https://www.youtube.com/watch?v=P7ouoHgf82I&t=3s">
+src="https://www.youtube.com/embed?v=P7ouoHgf82I&t=3s">
 </iframe>
