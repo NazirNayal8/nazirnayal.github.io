@@ -1,9 +1,11 @@
 ---
-title: "Software Engineering Intern @ Invent Analytics"
-excerpt: "Retail Analytics"
+title: "Invent Analytics"
+excerpt: "Software Engineering Intern"
 collection: experience
+type: "Software Engineering intern"
+permalink: /experience/invent_analytics
 date: 2020-07-09
-permalink: "/experience/invent_analytics"
+location: "Istanbul, Turkey"
 ---
 
 ## Location

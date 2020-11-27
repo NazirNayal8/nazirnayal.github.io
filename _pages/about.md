@@ -15,8 +15,7 @@ I am also a member of the Distributed Systems and Reliable Networks Laboratory (
 cool research projects.
 
 My academic interests generally include:
-* Machine Learning
-* Deep learning for NLP and Computer Vision
+* Deep learning for Computer Vision and NLP
 * Data Science
 * Algorithm & Data Structures
 * Software Engineering Design.
@@ -28,10 +27,10 @@ online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](http
 
 I am currently in the process of applying for my masters degree. My targeted research topics are:
 
+* Applications Deep Learning in Computer Vision and Natural Language Processing.
 * Developing interdisciplinary machine learning models to solve real-life problems.
-* Applications Deep Learning in Natural Language Processing and Computer Vision.
 * Developing Algorithms and Data Structures to solve real-life problems.
 
 # News
-* `12/09/2020` Finished Algorithm Competition League at rank 4.
+* `12/09/2020` Finished [inzva](https://inzva.com/)'s Algorithm Competition League at rank 4.
 * `01/09/2020` Finished my summer internship at Invent Analytics.

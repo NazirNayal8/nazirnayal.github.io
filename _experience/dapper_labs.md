@@ -1,7 +1,8 @@
 ---
-title: "Software Engineering Intern @ Dapper Labs"
-excerpt: "Blockchain Design"
+title: "Dapper Labs"
+excerpt: "Software Engineering Intern"
 collection: experience
+type: "Software Engineering Intern"
 date: 2019-08-01
 permalink: "/experience/dapper_labs"
 ---

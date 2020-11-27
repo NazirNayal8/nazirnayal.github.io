@@ -9,4 +9,11 @@ redirect_from:
 
 {% include base_path %}
 
-[Download CV here](http://nazirnayal.xyz/files/resume.pdf)
+
+
+<iframe src="/files/resume.pdf" width="100%" height="1000" frameborder="no" border="0" marginwidth="0" marginheight="0"></iframe>
+
+
+
+
+You may also download a copy of my CV from [here](/files/resume.pdf)

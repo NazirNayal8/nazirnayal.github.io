@@ -6,3 +6,15 @@ permalink: /interests/competitive_programming
 ---
 
 This is competitive programming.
+
+
+```c++
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+
+}
+
+```
