@@ -20,3 +20,20 @@ layout: default
     </section>
   </article>
 </div>
+
+<center>
+
+  <footer class="page__meta">
+    {% if site.data.ui-text[site.locale].meta_label %}
+      <h4 class="page__meta-title">{{ site.data.ui-text[site.locale].meta_label }}</h4>
+    {% endif %}
+    {% include page__taxonomy.html %}
+  </footer>
+
+{% if page.share %}{% include social-share.html %}{% endif %}
+
+{% if site.comments.provider and page.comments %}
+  {% include comments.html %}
+{% endif %}
+
+</center>

@@ -2,7 +2,8 @@
 title: "Skip Graph Middleware Implementation"
 collection: publications
 permalink: /publication/skip_graph
-excerpt:
+excerpt: "Y. Hassanzadeh-Nazarabadi, N. Nayal, S. Sameh Hamdan, A. Utkan Şahin, Ö. Özkasap, and A. Küpçü, ”Demo:
+Skip Graph Middleware Implementation”, in SRDS 2020."
 date: 2020-09-21
 venue: 'The 39th International Symposium on Reliable Distributed Systems (SRDS 2020)'
 paperurl: #'https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9169463'
