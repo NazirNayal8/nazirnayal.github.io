@@ -246,3 +246,47 @@ This approach has the property that repeating it infinitely many times results i
 **Note**: Sampling a variable given its Markov Blanket is enough.
 
 As with the previous methods, once we have the samples, probabilities are computer by counting samples that match the target and divide by the number of samples (because they all match the evidence by definition).
+
+**Note**: Gibbs Sampling is special case of a more general method called **Markov Chain Monte Carlo (MCMC)** methods. **Metropolis-Hastings** is another famous MCMC method.
+
+
+
+# Decision Networks
+
+They are an extension of Bayesian Networks where we assign utilities to outcomes to help make decisions. Two new types of nodes are added to the Bayesian Network:
+* Actions (Rectangles): cannot have parents because agents decide on their actions.
+* Utility Node (Diamond): depends on action and chance nodes.
+
+<p align="center">
+<img width="340" height="400" src="/images/bayes_net/decision_net.png">
+</p>
+
+How to select an action in this network:
+1. Instantiate all evidence variables.
+2. Calculate Posterior of all parents of the utility node.
+3. For every possible action, calculate the expected utility.
+4. Choose Action with maximum utility. This is called the **Maximum Expected Utility (MEU)**.
+
+# Value of Information
+
+Finding the value of discovering new information or in the case of Bayesian Network adding new evidence values can help in deciding to which direction we must put effort in order to collect data. Therefore we attempt to calculate the Value of Information to guide our choices and decisions better.
+
+**How to calculate the Value of Information ?**
+1. Calculate the Maximum Expected Utility (MEU) before acquiring the new evidence.
+2. Calculate expected MEU after acquiring the new evidence
+3. Value of Information is equal to new expected MEU minus old MEU.
+4. If Value of Information is positive, then it would by worthwhile adding this evidence.
+
+**How to calculate the Expected MEU after acquiring new evidence** ?
+1. Assume evidence is added
+2. For every value of the evidence, calculated expected utility conditioned on that value.
+3. For every value of the evidence, multiply probability of evidence with expected utility conditioned on that evidence and sum all these values. The result is the expected MEU.
+
+Properties of Value of Information (VPI):
+* Non-negative: we can never get a negative VPI.
+* Non-Additive
+$$ VPI(E_i, E_j \| e) \neq VPI(E_i \| e) + VPI(E_j \| e)$$
+* Order Independent: If you have two evidences to check their values, it doesn't matter in which order they are calculated.
+$$ VPI(E_i, E_j \| e) = VPI(E_i \| e) + VPI(E_j \| e, E_i) = VPI(E_j \| e) + VPI(E_i \| e, E_j)$$
+
+**Note**: $VPI$ stands for Value of Perfect Information.
