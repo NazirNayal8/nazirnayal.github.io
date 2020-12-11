@@ -9,6 +9,7 @@ tags:
 categories:
   - Tutorial
   - Artificial Intelligence
+  layout: splash
 ---
 
 # Bayesian Networks
@@ -36,7 +37,7 @@ In order to extract the joint distribution from the local conditionals, we can u
 $$ P(X_1, X_2, \dots , X_n) = \prod_{i=1}^n P(X_i|Parents(X_i))$$
 
 
-## Size of a Bayesian Networks
+## Size of a Bayesian Network
 
 In order to store a table that represents an ordinary joint distribution of `N` variables where each variable can take `d` values, one would need $O(d^N)$ entries which is too large.
 
