@@ -27,7 +27,7 @@ $$P(A | Parents(A))$$
 
 
 <figure>
-    <img src="/images/bayes_net_example.png" alt='missing' />
+    <img src="/images/bayes_net/bayes_net_example.png" alt='missing' />
     <figcaption> Source: https://inst.eecs.berkeley.edu/~cs188/sp20/assets/lecture/lec-18-handout.pdf </figcaption>
 </figure>
 
@@ -55,20 +55,9 @@ If two variables do not have a direct connection, this does **not** mean that th
 
 For example in this graph below, `A` and `B` are not necessarily independent because they can influence each other through `B`.
 
-<center>
-{% graphviz  %}
-
-digraph A {
-  center="true";
-  size="6,6";
-  rankdir="LR";
-  node [shape=circle, width=0.4];
-  ranksep = 1.5;
-  A -> B -> C
-}
-
-{% endgraphviz %}
-</center>
+<p align="center">
+<img width="450" height="60" src="/images/bayes_net/causal_chain.png">
+</p>
 
 Nevertheless, we can prove **conditional independence** of some cases. For example, in the network above, we can say that `C` is conditionally independent from `A` given `B`. The intuition is that since a value of `B` was given, it already holds the influence from `A`, or another way to think of it that the influence between `A` and `C` was blocked by `B`.
 
@@ -78,56 +67,24 @@ There are 3 types of simple 3-node graphs which are simple to analyze and will b
 # Causal Chains
 
 From this structure we can only say that `C` is conditionally independent of `A` given `B`. (can be proven mathematically)
-<center>
-{% graphviz  %}
 
-digraph A {
-  center="true";
-  size="6,6";
-  rankdir="LR";
-  node [shape=circle, width=0.4];
-  ranksep = 1.5;
-  A -> B -> C
-}
-
-{% endgraphviz %}
-</center>
+<p align="center">
+<img width="450" height="60" src="/images/bayes_net/causal_chain.png">
+</p>
 
 # Common Cause
 
 Here, we can say that `B` and `C` are independent given `A`. (can be proven mathematically)
 
-<center>
-{% graphviz  %}
-
-digraph A {
-  center="true";
-  size="6,6";
-  node [shape=circle, width=0.4];
-  ranksep = 1;
-  A -> B
-  A -> C
-}
-
-{% endgraphviz %}
-</center>
+<p align="center">
+<img width="150" height="210" src="/images/bayes_net/common_cause.png/">
+</p>
 
 
 # Common Effect
 
 Here, `A` and `B` are in fact fully independent, but they are not independent given `C`.
 
-<center>
-{% graphviz  %}
-
-digraph A {
-  center="true";
-  size="6,6";
-  node [shape=circle, width=0.4];
-  ranksep = 1;
-  A -> C
-  B -> C
-}
-
-{% endgraphviz %}
-</center>
+<p align="center">
+<img width="150" height="210" src="/images/bayes_net/common_effect.png/">
+</p>
