@@ -170,3 +170,4 @@ Here are the steps to follow in order to solve a query using Variable Eliminatio
 2. Since we cannot eliminate a hidden variable unless it exists in only one facts, we join factors which have a common hidden variable.
 3. Then for every factor which contains a hidden variable and that hidden variable only exists in that factor, eliminate the hidden variable.
 4. Repeat steps 2 and 3 until the factor left consists of target and evidence.
+5. Finally we normalize the table we get, because the existence of evidence variables might cause a selected joint to appear.
