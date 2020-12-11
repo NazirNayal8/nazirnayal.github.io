@@ -171,3 +171,8 @@ Here are the steps to follow in order to solve a query using Variable Eliminatio
 3. Then for every factor which contains a hidden variable and that hidden variable only exists in that factor, eliminate the hidden variable.
 4. Repeat steps 2 and 3 until the factor left consists of target and evidence.
 5. Finally we normalize the table we get, because the existence of evidence variables might cause a selected joint to appear.
+
+**Note:** When joining two tables where each table contains some variables on the left side of the condition and variables on right side, the trick is to place all variables on the left side of the two tables to the left side of the output table, and then place the rest on the right. This would save time in a case where a variable exists on the left side of a table and the right side of another table. To understand what I mean by left and right: $P(X\|Y)$, here $X$ is the left of the condition and $Y$ is the right of the condition.
+
+
+**Conclusion of Variable Elimination**: The worst case complexity of Variable Elimination is not better than Enumeration in theory but in practice it is faster. This difference in speed is due to the fact that eliminating some variables in a certain order decreases the **maximum factor generated**, which affects the computations significantly if we were able to find a good ordering.
