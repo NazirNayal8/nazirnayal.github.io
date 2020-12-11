@@ -176,3 +176,28 @@ Here are the steps to follow in order to solve a query using Variable Eliminatio
 
 
 **Conclusion of Variable Elimination**: The worst case complexity of Variable Elimination is not better than Enumeration in theory but in practice it is faster. This difference in speed is due to the fact that eliminating some variables in a certain order decreases the **maximum factor generated**, which affects the computations significantly if we were able to find a good ordering.
+
+
+# Approximate Inference
+
+Since it takes too long to calculate exact inferences using the method discussed earlier, we may sacrifice some of the exactness in order to speed up the calculation. One method to do this is **Sampling**.
+
+# Sampling
+
+The idea behind sampling is to draw $N$ samples from a distribution and then use these samples to compute an approximate posterior probability and show that this can converge to the true probability. **How can we computer a posterior probability from samples ?** Simply, we divide the number of samples matching the target over the samples matching the evidence, a very basic way of calculating probability.
+
+## How to sample from a known distribution
+
+Since it is a known distribution, then for each value the random variable takes we know its probability. Hence, we do the following steps:
+1. Get a sample $u$ from the uniform distribution over the interval [0, 1) (assume that we have the mechanism to do so).
+2. For every value of the random variable assign an interval in the range [0, 1) which is of length equal to the probability at that value. We can do this because the sum of all probabilities is equal to 1.
+3. Choose the value of the random variable that has the sample $u$ within it.
+4. Repeat this processs $n$ times to get $n$ samples.
+
+Four main sampling methods will be discussed
+* Prior Sampling
+* Rejection Sampling
+* Likelihood Weighting
+* Gibbs Sampling (Most used)
+
+# Prior sampling
