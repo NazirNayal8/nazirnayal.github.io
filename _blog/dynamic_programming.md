@@ -1,7 +1,7 @@
 ---
 title: 'Dynamic Programming Tutorial'
 date: 2020-11-28
-permalink: /blogs/tutorials/dp1
+permalink: /blog/tutorials/dp1
 tags:
   - Competitive Programming
   - Dynamic Programming
