@@ -108,3 +108,24 @@ For a given node `X`, we can say that it is conditionally independent of all oth
 <p align="center">
 <img width="500" height="400" src="/images/bayes_net/markov_blanket.png">
 </p>
+
+# Probabilistic Inference
+
+The act of calculating the probability that some random variables take certain values from a join distribution.
+
+# Inference by Enumeration
+
+This is basically the brute force way of calculating a certain probability, where we first take the sum of the probabilities of all the hidden random variables to eliminate them, and then calculate the desired probability of the target and evidence.
+
+**Note**: Hidden variables are the rest of the random variables which are neither in the target set, nor in the evidence set. Evidence contains the random variables which make the condition of the probability calculated.
+
+Enumeration gives an exact answer but is exponential in complexity.
+
+Steps of performing Inference by Enumeration
+
+1. From each probability table, select the entries whose rows are consistent with the evidence. That is, if we have two variables `A` and `B` in the evidence, and both take values `a` and `b` respectively, then select all rows for which variables `A` and `B` have values `a` and `b` respectively.
+2. For all the hidden variables, sum out their values. This means compute the sum of probabilities for all combinations of hidden variables values. This operation is called **marginalization**.
+$$P(Q, e_1 \dots e_n) = \sum_{h_1 \dots h_r} P(Q, h_1 \dots h_r, e_1 \dots e_k)$$
+3. Normalize the the the values left so that their sum is 1 and they form a valid distribution.
+
+$$ Z = \sum_q P(Q, e_1 \dots e_k) \space \space , \space \space P(Q | e_1 \dots e_k) = \frac{1}{Z} P(Q | e_1 \dots e_k)$$
