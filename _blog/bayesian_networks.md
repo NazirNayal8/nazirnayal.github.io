@@ -150,16 +150,23 @@ For Bayesian Networks, let's see what kind of factors there can be:
 * Selected Joint $P(x, Y)$
   * A slice of the joint Distribution
   * Sums to $P(x)$, because it represent probability of $x$ for every value of $y$, which means that $P(x)$ is sort of partitioned over $y$ values.
-* Single Conditional $P(Y | x)$
+* Single Conditional $P(Y\|x)$
   * Contains entries $P(y, x)$ for all $y$ and fixed $x$
   * Sums to 1, because it is basically a conditional probability distribution for all values of y conditioned on a single value $x$.
-* Family of Conditionals $P(Y|X)$
+* Family of Conditionals $P(Y\|X)$
   * Contains multiple conditionals.
-  * Contains Entries $P(y|x)$ for all $x,y$
-  * sums to |X|, which is the number of values that can be taken by the random variable $X$. This is because for every value $X$, we have a conditional distribution for $Y$ over that particular $x$, which means we essentially have $|X|$ distributions where each one sums to 1.
-  * Specified Family $P(y|X)$
-    * Contains entries $P(y|x)$ for fixed $y$, **but for all $x$** (*This is how it's different from Selected Joint: It is not a distribution, but rather a 1 dimensional array for values of probabilities that are calculated for every x value*).
+  * Contains Entries $P(y\|x)$ for all $x,y$
+  * sums to $\|X\|$, which is the number of values that can be taken by the random variable $X$. This is because for every value $X$, we have a conditional distribution for $Y$ over that particular $x$, which means we essentially have $\|X\|$ distributions where each one sums to 1.
+  * Specified Family $P(y\|X)$
+    * Contains entries $P(y\|x)$ for fixed $y$, but for all $x$.
     * Sums to an unknown value.
 
 
-  
+
+
+So now back to Variable Elimination, we will use 2 main operations, **join** and **eleminate**. Join operation basically joins two tables in a similar way to the database join operations. In simpler terms, if table `A` has two variables `X` and `Y`, and table `B` has two variables `Y` and `Z`, then a join operation would result in a 3 dimensional table of `X`, `Y`, and `Z`. where probability of an entry in table `A` is multiplied by the a probability of table `B` where the common variable `Y` values match. Eliminate operations is simply summing for all the values of a certain variable to remove it from the table.
+1. Select all rows that match the evidence and delete rows that do not match it, that is only if a table contains an evidence variable. If a table does not contain an evidence variable don't touch it.
+Here are the steps to follow in order to solve a query using Variable Elimination:
+2. Since we cannot eliminate a hidden variable unless it exists in only one facts, we join factors which have a common hidden variable.
+3. Then for every factor which contains a hidden variable and that hidden variable only exists in that factor, eliminate the hidden variable.
+4. Repeat steps 2 and 3 until the factor left consists of target and evidence.
