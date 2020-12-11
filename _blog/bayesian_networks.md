@@ -285,8 +285,15 @@ Finding the value of discovering new information or in the case of Bayesian Netw
 Properties of Value of Information (VPI):
 * Non-negative: we can never get a negative VPI.
 * Non-Additive
+
 $$ VPI(E_i, E_j \| e) \neq VPI(E_i \| e) + VPI(E_j \| e)$$
+
 * Order Independent: If you have two evidences to check their values, it doesn't matter in which order they are calculated.
+
+
 $$ VPI(E_i, E_j \| e) = VPI(E_i \| e) + VPI(E_j \| e, E_i) = VPI(E_j \| e) + VPI(E_i \| e, E_j)$$
 
 **Note**: $VPI$ stands for Value of Perfect Information.
+
+We can have some shortcuts in calculating VPO through some independence properties:
+* If $Parents(U)$ ($U$ is utility node) is independent from a node `Z` given some evidence, then $VPI(Z \| evidence) = 0$
