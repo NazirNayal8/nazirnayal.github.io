@@ -129,3 +129,37 @@ $$P(Q, e_1 \dots e_n) = \sum_{h_1 \dots h_r} P(Q, h_1 \dots h_r, e_1 \dots e_k)$
 3. Normalize the the the values left so that their sum is 1 and they form a valid distribution.
 
 $$ Z = \sum_q P(Q, e_1 \dots e_k) \space \space , \space \space P(Q | e_1 \dots e_k) = \frac{1}{Z} P(Q | e_1 \dots e_k)$$
+
+
+# Variable Elimination
+
+In enumeration, what we did was build the whole join distribution and then marginalize in order to reduce it to the desired state of target and evidence variables. The idea suggested by Variable Elimination to speed up the calculations is to interleave between joining and marginalizing. It basically remains exponential but it helps speed up the calculations compared to enumerations.
+
+In order to understand how Variable Elimination works, we need to understand the concept of **Factors** first.
+
+## Factors
+
+Factorization as a mathematical concept means to decompose an object into a product of other objects called factors.
+
+**Note**: Capital letters in a distribution determine its dimensions, because small letters denote assigned values.
+
+For Bayesian Networks, let's see what kind of factors there can be:
+* Joint Distribution $P(X,Y)$
+  * Contains entries $P(x,y)$ for all $x,y$
+  * Sums to 1
+* Selected Joint $P(x, Y)$
+  * A slice of the joint Distribution
+  * Sums to $P(x)$, because it represent probability of $x$ for every value of $y$, which means that $P(x)$ is sort of partitioned over $y$ values.
+* Single Conditional $P(Y | x)$
+  * Contains entries $P(y, x)$ for all $y$ and fixed $x$
+  * Sums to 1, because it is basically a conditional probability distribution for all values of y conditioned on a single value $x$.
+* Family of Conditionals $P(Y|X)$
+  * Contains multiple conditionals.
+  * Contains Entries $P(y|x)$ for all $x,y$
+  * sums to |X|, which is the number of values that can be taken by the random variable $X$. This is because for every value $X$, we have a conditional distribution for $Y$ over that particular $x$, which means we essentially have $|X|$ distributions where each one sums to 1.
+  * Specified Family $P(y|X)$
+    * Contains entries $P(y|x)$ for fixed $y$, **but for all $x$** (*This is how it's different from Selected Joint: It is not a distribution, but rather a 1 dimensional array for values of probabilities that are calculated for every x value*).
+    * Sums to an unknown value.
+
+
+  
