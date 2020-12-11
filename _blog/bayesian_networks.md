@@ -192,7 +192,7 @@ Since it is a known distribution, then for each value the random variable takes 
 1. Get a sample $u$ from the uniform distribution over the interval [0, 1) (assume that we have the mechanism to do so).
 2. For every value of the random variable assign an interval in the range [0, 1) which is of length equal to the probability at that value. We can do this because the sum of all probabilities is equal to 1.
 3. Choose the value of the random variable that has the sample $u$ within it.
-4. Repeat this processs $n$ times to get $n$ samples.
+4. Repeat this process $n$ times to get $n$ samples.
 
 Four main sampling methods will be discussed
 * Prior Sampling
@@ -201,3 +201,15 @@ Four main sampling methods will be discussed
 * Gibbs Sampling (Most used)
 
 # Prior sampling
+
+To apply prior sampling on a Bayesian Network:
+1. Sort the nodes in the graph using topological sorting.
+2. Iterate over the variables in the sorted order and randomly sample from each. Sampling from a node would affect sampling of its children, because if a random variable `A` gets a value `a`, then when sampling from its child `B`, we sample from the distribution that is conditioned on `A` taking the value `a`. Topological sorting guarantees that a node will not be sampled until all its parents are sampled, which determines the value combinations the child needs to sample from.
+3. When the last node is reached, we would have gained a single sample of our Bayesian Network. So we need to repeat the steps $n$ times to get $n$ samples.
+4. Once we get $n$ samples, we eliminate the samples which do not match the evidence, then the desired probability would be the number of samples which match the target divided by the number of samples left.
+
+As $n$ goes to infinity, then the probabilities computer using Prior Sampling would converge to the exact original probabilities. This is why we call this sampling method **consistent**.
+
+# Rejection Sampling
+
+The idea in Rejection Sampling is simple, given a desired query with targets and evidence, for every sample we get, we reject it if it does not match our desired evidence. That is, if we want to collect $n$ samples, we keep drawing samples such that all the $n$ chosen samples have our evidence satisfied, so we might perform more than $n$ sampling operations to get $n$ samples which match our evidence. The number of sampling operations can be very high if our evidence is unlikely because we would reject many of the samples we get.
