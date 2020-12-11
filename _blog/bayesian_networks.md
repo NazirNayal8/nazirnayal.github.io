@@ -26,7 +26,7 @@ $$P(A | Parents(A))$$
 
 <figure>
     <img src="/images/bayes_net_example.png" alt='missing' />
-    <figcaption> Source: https://inst.eecs.berkeley.edu/~cs188/sp20/assets/lecture/lec-18-handout.pdf
+    <figcaption> Source: https://inst.eecs.berkeley.edu/~cs188/sp20/assets/lecture/lec-18-handout.pdf </figcaption>
 </figure>
 
 ## From Conditional to Joint
