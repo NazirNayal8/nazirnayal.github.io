@@ -9,7 +9,7 @@ tags:
 categories:
   - Tutorial
   - Artificial Intelligence
-  layout: splash
+layout: splash
 ---
 
 # Bayesian Networks
