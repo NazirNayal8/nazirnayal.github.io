@@ -1,13 +1,13 @@
 ---
 layout: archive
-title: "Blogs"
-permalink: /blogs/
+title: "Blog"
+permalink: /blog/
 author_profile: true
 ---
 
 
 {% include base_path %}
 
-{% for post in site.blogs reversed %}
+{% for post in site.blog reversed %}
   {% include archive-single.html %}
 {% endfor %}
