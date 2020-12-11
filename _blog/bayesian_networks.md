@@ -242,3 +242,7 @@ Approach to Generate a Single Sample:
 This approach has the property that repeating it infinitely many times results in a sample that comes from the correct distribution. This way we also guarantee that both upstream and downstream variables are conditioned on evidence.
 
 **One might ask**: How efficient is it to sample one variable conditioned on all the rest ? Well, the probability of a variable conditioned on all the rest is equal to the joint probability divided on the probability of all the rest. In this equation many terms would cancel out between the numerator and denominator. More specifically, all Conditional Probability Tables which do not contain the re-sampled variables will be canceled out. In other words, to re-sample a variable we simply join the tables that contain it and use them for the calculations, which can be faster if the local interactions in the Bayesian Network were limited.
+
+**Note**: Sampling a variable given its Markov Blanket is enough.
+
+As with the previous methods, once we have the samples, probabilities are computer by counting samples that match the target and divide by the number of samples (because they all match the evidence by definition).
