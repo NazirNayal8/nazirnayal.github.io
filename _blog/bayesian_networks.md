@@ -228,3 +228,17 @@ Likelihood Weighting is **consistent** because the product of Sampling distribut
 **Note:** After generating the samples, instead of counting the number of samples satisfying the target, we sum the weights instead. This is essential to produce a consistent answer.
 
 **Issues of Likelihood Weighting**: Fixing the evidence affects the downstream variables (variables which are reachable from an evidence in the directed graph and come after it in the topological sorting), but it does not affect the upstream variables (variables which can reach the evidence in the directed graph and come before it in the topological sorting). this is bad because when fixing the evidence, all its downstream will be affected by its value but it would still follow the distribution. On the other hand, fixing the value of an evidence regardless of its parents values creates an inconsistency which we approximately solve by using the weight approach. Therefore, the larger the number of upstream variables, the less accurate the approximation is. Following this logic, we prefer evidences that exist at the top of the hierarchy rather than the bottom.
+
+
+# Gibbs Sampling
+
+Gibbs Sampling addresses the issue with Likelihood Weighting, which is that the upstream variables of a fixed evidence are sampled independently from the fixed evidence. Gibbs Sampling attempts to sample all variables taking evidence into consideration.
+
+Approach to Generate a Single Sample:
+1. Start with a random assignment to each variable except for the evidence variables which are already fixed with their pre-determined values.
+2. Sample each non-evidence variable one variable at a time (Round Robin Style), conditioned on all the other variables while keeping the evidence fixed.
+3. Repeat this for a long time.
+
+This approach has the property that repeating it infinitely many times results in a sample that comes from the correct distribution. This way we also guarantee that both upstream and downstream variables are conditioned on evidence.
+
+**One might ask**: How efficient is it to sample one variable conditioned on all the rest ? Well, the probability of a variable conditioned on all the rest is equal to the joint probability divided on the probability of all the rest. In this equation many terms would cancel out between the numerator and denominator. More specifically, all Conditional Probability Tables which do not contain the re-sampled variables will be canceled out. In other words, to re-sample a variable we simply join the tables that contain it and use them for the calculations, which can be faster if the local interactions in the Bayesian Network were limited.
