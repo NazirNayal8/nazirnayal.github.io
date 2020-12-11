@@ -64,7 +64,7 @@ Nevertheless, we can prove **conditional independence** of some cases. For examp
 There are 3 types of simple 3-node graphs which are simple to analyze and will be used to detect properties in Bayesian Networks. These graphs are **causal chains**, **common cause**, and **common effect**.
 
 
-# Causal Chains
+## Causal Chains
 
 From this structure we can only say that `C` is conditionally independent of `A` given `B`. (can be proven mathematically)
 
@@ -72,19 +72,22 @@ From this structure we can only say that `C` is conditionally independent of `A`
 <img width="450" height="60" src="/images/bayes_net/causal_chain.png">
 </p>
 
-# Common Cause
+## Common Cause
 
 Here, we can say that `B` and `C` are independent given `A`. (can be proven mathematically)
 
 <p align="center">
-<img width="150" height="210" src="/images/bayes_net/common_cause.png/">
+<img width="150" height="210" src="/images/bayes_net/common_cause.png">
 </p>
 
 
-# Common Effect
+## Common Effect
 
 Here, `A` and `B` are in fact fully independent, but they are not independent given `C`.
 
 <p align="center">
-<img width="150" height="210" src="/images/bayes_net/common_effect.png/">
+<img width="150" height="210" src="/images/bayes_net/common_effect.png">
 </p>
+
+
+# Detect if 2 nodes are independent from the graph structure
