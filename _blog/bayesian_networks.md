@@ -51,10 +51,16 @@ No, not all the time. It is easier to think of the graph as if it means that a c
 
 If two variables do not have a direct connection, this does **not** mean that they are independent, they might indirectly influence each other through other nodes.
 
-```fdp
+For example in this graph below, `A` and `B` are not necessarily independent because they can influence each other through `B`.
 
+```dot {align="center"}
 digraph G {
+  size="6,6";
+  rankdir="LR";
+  center=true;
   A -> B -> C
 }
-
 ```
+
+
+Nevertheless, we can prove **conditional independence**. For example, in the network above, we can say that `C` is conditionally independent from `A` given `B`. The intuition is that since a value of `B` was given, it already holds the influence from `A`, or another way to think of it that the influence between `A` and `C` was blocked by `B`.
