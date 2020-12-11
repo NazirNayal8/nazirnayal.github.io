@@ -92,8 +92,19 @@ Here, `A` and `B` are in fact fully independent, but they are not independent gi
 
 # Detect if 2 nodes are conditionally independent from the graph structure
 
-We can do this by tracing the undirected path between any two nodes on the graph. For every 3 consecutive nodes on the path, we check if they satisfy conditional independence. In order to do the check, we simply identify to which type this triplet belongs (causal chain, common cause, common effect). If we find any triplet on the path to voilate independence then we assume that the source and target nodes are not conditionally independent. The triplets which imply conditional independence are called **Inactive Triplets**, whereas triplets that violate conditional independence are called **Active Triplets**. The following figure summarizes the triplet cases.
+We can do this by tracing the undirected path between any two nodes on the graph. For every 3 consecutive nodes on the path, we check if they satisfy conditional independence. In order to do the check, we simply identify to which type this triplet belongs (causal chain, common cause, common effect). If we find any triplet on the path to voilate independence then we assume that conditional independence between source and target node is **not guaranteed**. The triplets which imply conditional independence are called **Inactive Triplets**, whereas triplets that violate conditional independence are called **Active Triplets**. The following figure summarizes the triplet cases.
 
 <p align="center">
 <img width="437" height="500" src="/images/bayes_net/triplets.png">
+</p>
+
+
+This approach is called **D-Separation**.
+
+# Markov Blanket
+
+For a given node `X`, we can say that it is conditionally independent of all other nodes given its Markov Blanket. A **Markove Blanket** for a node consists of its parents, children, and children's parents. Like in the image below.
+
+<p align="center">
+<img width="500" height="400" src="/images/bayes_net/markov_blanket.png">
 </p>
