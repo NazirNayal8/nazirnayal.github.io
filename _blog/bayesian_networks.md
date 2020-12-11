@@ -213,3 +213,18 @@ As $n$ goes to infinity, then the probabilities computer using Prior Sampling wo
 # Rejection Sampling
 
 The idea in Rejection Sampling is simple, given a desired query with targets and evidence, for every sample we get, we reject it if it does not match our desired evidence. That is, if we want to collect $n$ samples, we keep drawing samples such that all the $n$ chosen samples have our evidence satisfied, so we might perform more than $n$ sampling operations to get $n$ samples which match our evidence. The number of sampling operations can be very high if our evidence is unlikely because we would reject many of the samples we get.
+
+# Likelihood Weighting
+
+Rejection Sampling has a very serious limitation, which is the fact that many samples can be rejected if the evidence was unlikely. Likelihood Weighting solves this issue with the following steps:
+
+1. Fix the evidence variables and sample from the others instead of rejecting.
+2. Fixing evidence alone would disrupt the distribution and make it inconsistent. Therefore, we modify the sampling algorithm maintain and return a constant weight which is initially set to 1.
+3. As we move through the network in topological order, if we encounter an evidence variable, we multiply its probability give its parents with the weight constant we have and update the value of the weight to the new value (old value times probability of evidence given its parents).
+4. The sampling algorithm returns the sample with accumulated weight, so in this way every sample will be associated with a certain weight.
+
+Likelihood Weighting is **consistent** because the product of Sampling distribution that is a result of fixing evidence and the weight of every sample (which is an accumulated product of evidence variables given their parents) gives us the original join distribution (Mathematical equations to be added here later).
+
+**Note:** After generating the samples, instead of counting the number of samples satisfying the target, we sum the weights instead. This is essential to produce a consistent answer.
+
+**Issues of Likelihood Weighting**: Fixing the evidence affects the downstream variables (variables which are reachable from an evidence in the directed graph and come after it in the topological sorting), but it does not affect the upstream variables (variables which can reach the evidence in the directed graph and come before it in the topological sorting). this is bad because when fixing the evidence, all its downstream will be affected by its value but it would still follow the distribution. On the other hand, fixing the value of an evidence regardless of its parents values creates an inconsistency which we approximately solve by using the weight approach. Therefore, the larger the number of upstream variables, the less accurate the approximation is. Following this logic, we prefer evidences that exist at the top of the hierarchy rather than the bottom.
