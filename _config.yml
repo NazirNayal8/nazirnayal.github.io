@@ -187,7 +187,7 @@ collections:
   interests:
     output: true
     permalink: /:collection/:path/
-  blogs:
+  blog:
     output: true
     permalink: /:collection/:path/
   projects:
@@ -215,7 +215,7 @@ defaults:
   # _blogs
   - scope:
       path: ""
-      type: blogs
+      type: blog
     values:
       layout: single
       author_profile: true
