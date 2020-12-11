@@ -90,4 +90,10 @@ Here, `A` and `B` are in fact fully independent, but they are not independent gi
 </p>
 
 
-# Detect if 2 nodes are independent from the graph structure
+# Detect if 2 nodes are conditionally independent from the graph structure
+
+We can do this by tracing the undirected path between any two nodes on the graph. For every 3 consecutive nodes on the path, we check if they satisfy conditional independence. In order to do the check, we simply identify to which type this triplet belongs (causal chain, common cause, common effect). If we find any triplet on the path to voilate independence then we assume that the source and target nodes are not conditionally independent. The triplets which imply conditional independence are called **Inactive Triplets**, whereas triplets that violate conditional independence are called **Active Triplets**. The following figure summarizes the triplet cases.
+
+<p align="center">
+<img width="437" height="500" src="/images/bayes_net/triplets.png">
+</p>
