@@ -25,7 +25,7 @@ online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](http
 
 # Current Directions
 
-I am currently in the process of applying for my masters degree. My targeted research topics are:
+I am currently in the process of applying for my graduate degree. My targeted research topics are:
 
 * Applications Deep Learning in Computer Vision and Natural Language Processing.
 * Developing interdisciplinary machine learning models to solve real-life problems.
