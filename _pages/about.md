@@ -27,10 +27,10 @@ online rounds hosted on [codeforces](https://codeforces.com/) and [atcoder](http
 
 I am currently in the process of applying for my graduate degree. My targeted research topics are:
 
-* Applications Deep Learning in Computer Vision and Natural Language Processing.
-* Developing interdisciplinary machine learning models to solve real-life problems.
-* Developing Algorithms and Data Structures to solve real-life problems.
+* Developing and Utilizing Deep Learning models in Computer Vision and in Natural Language Processing.
+* Representation Learning for vision and language understanding problems.
 
 # News
+* `28/12/2020` Finished in 5th place in inzva's Online Programming Contest for Universities.
 * `12/09/2020` Finished [inzva](https://inzva.com/)'s Algorithm Competition League at rank 4.
 * `01/09/2020` Finished my summer internship at Invent Analytics.
