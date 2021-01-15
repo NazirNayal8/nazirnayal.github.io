@@ -4,6 +4,7 @@ excerpt: Multi-Label Text Classification using LSTM Neural Network
 collection: projects
 permalink: /projects/amazon_review_sentiment
 date: 2020-05-25
+layout: splash
 categories:
   - University Project
 tags:

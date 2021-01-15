@@ -4,6 +4,7 @@ excerpt: "Implementation of Contiguous Allocation and Linked Allocation algorith
 collection: projects
 permalink: /projects/file_system_memory_allocation
 date: 2020-04-25
+layout: splash
 categories:
   - University Project
 tags:

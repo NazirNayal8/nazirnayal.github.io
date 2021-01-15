@@ -4,6 +4,7 @@ excerpt: Simulating air traffic control in an airport modeled as a resource allo
 collection: projects
 permalink: /projects/air_traffic_control
 date: 2020-04-01
+layout: splash
 categories:
   - University Project
 tags:

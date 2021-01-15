@@ -5,24 +5,21 @@ permalink: /research/
 author_profile: true
 ---
 
-My current research interests can be summarized as follows:
+Recently, I have been becoming increasingly interested in how machines can perceive language and visual data. As a first step towards this research direction, I started working recently on examining ways to summarize high-level visual concepts into a few dense vector representations. This project is part of my Deep Learning with Computer Vision course I am taking this semester.
 
-* Developing interdisciplinary machine learning models to solve real-life problems.
-* Applications Deep Learning in Natural Language Processing and Computer Vision.
-* Developing Algorithms and Data Structures to solve real-life problems.
-
-# Current Affiliations
-
-I am a member in the Distributed Systems and Reliable Networks Laboratory at Koç University (DISNET).
+* Developing and Utilizing Deep Learning models in Computer Vision and in Natural Language Processing.
+* Representation Learning for vision and language understanding problems.
 
 # Active Research Projects
+
+* [A Study of Token-Based Visual Transformers](/projects/visual_tokens)
+
+# Previous Projects
+
+* [LightChain Proof of Concept Implementation](/projects/lightchain_implementation) (DISNET Lab)
 
 * [Skip Graph Middleware](/projects/skip_graph_middleware) (DISNET Lab)
 
 * [Distributed Simulator](/projects/distributed_simulator) (DISNET Lab)
 
 * [LightChain Proof of Validation](/projects/lightchain_pov) (DISNET Lab)
-
-# Previous Projects
-
-* [LightChain Proof of Concept Implementation](/projects/lightchain_implementation) (DISNET Lab)

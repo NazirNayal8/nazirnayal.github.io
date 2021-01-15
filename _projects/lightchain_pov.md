@@ -4,6 +4,7 @@ excerpt: "An implementation of LightChain Deterministic Finality for fork resolu
 collection: projects
 permalink: /projects/lightchain_pov
 date: 2020-10-01
+layout: splash
 categories:
   - Research Project
 tags:

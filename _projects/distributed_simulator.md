@@ -4,6 +4,7 @@ excerpt: "An implementation of a Distributed Systems Simulator with metrics moni
 collection: projects
 permalink: /projects/distributed_simulator
 date: 2020-09-01
+layout: splash
 categories:
   - Research Project
 tags:

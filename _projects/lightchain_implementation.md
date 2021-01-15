@@ -4,6 +4,7 @@ excerpt: "An implementation of LightChain System, which is DHT-based permission-
 collection: projects
 permalink: /projects/lightchain_implementation
 date: 2020-05-05
+layout: splash
 categories:
   - Research Project
 tags:

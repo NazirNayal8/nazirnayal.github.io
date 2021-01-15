@@ -4,6 +4,7 @@ excerpt: "Open-Source Implementation of Skip Graph Middelware"
 collection: projects
 permalink: /projects/skip_graph_middleware
 date: 2020-07-01
+layout: splash
 categories:
   - Research Project
 tags:

@@ -4,6 +4,7 @@ excerpt: "An exciting desktop game with bricks, aliens, power-ups, and more inte
 collection: projects
 permalink: /projects/bricking_bad
 date: 2019-12-28
+layout: splash
 categories:
   - University Project
 tags:
