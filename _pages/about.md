@@ -8,8 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-I am a Computer Engineering Senior Student at Koç University and a recipient of [Abdulla Al Ghurair Foundation for Education (AGFE)](https://www.alghurairfoundation.org/en) STEM Scholarship. I am also a member of the Distributed Systems and Reliable Networks Laboratory (DISNET) at Koç University, where I am working on several
-cool research projects.
+I am a Computer Engineering Senior Student at Koç University and a recipient of [Abdulla Al Ghurair Foundation for Education (AGFE)](https://www.alghurairfoundation.org/en) STEM Scholarship.
 
 I am currently in the process of applying for my graduate degree. My targeted research topics are:
 
