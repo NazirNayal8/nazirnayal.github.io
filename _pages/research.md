@@ -5,16 +5,19 @@ permalink: /research/
 author_profile: true
 ---
 
-Recently, I have been becoming increasingly interested in how machines can perceive language and visual data. As a first step towards this research direction, I started working recently on examining ways to summarize high-level visual concepts into a few dense vector representations. This project is part of my Deep Learning with Computer Vision course I am taking this semester.
+# Interests
+Deep Learning, Computer Vision, Representation Learning, Intersection of Vision and Language.
 
-* Developing and Utilizing Deep Learning models in Computer Vision and in Natural Language Processing.
-* Representation Learning for vision and language understanding problems.
 
 # Active Research Projects
-
-* [A Study of Token-Based Visual Transformers](/projects/visual_tokens)
+* [Rare Events Prediction in Autonomous Driving](/projects/rare) (AVG & KUIS AI)
 
 # Previous Projects
+* [Efficient Transformer-Based GANs](/projects/efficient_transformer_gans) (Deep Unsupervised Learning Course Project)
+
+* [Token-Based Video Transformers](/projects/token_video_transformers) (Computer Vision Group)
+
+* [A Study of Token-Based Visual Transformers](/projects/visual_tokens) (Computer Vision Group)
 
 * [LightChain Proof of Concept Implementation](/projects/lightchain_implementation) (DISNET Lab)
 
