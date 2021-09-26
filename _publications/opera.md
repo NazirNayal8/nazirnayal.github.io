@@ -1,9 +1,9 @@
 ---
-title: "Opera: Scalable Simulator for Distributed Systems"
+title: "Opera a Scalable Simulator for Distributed Systems"
 collection: publications
 permalink: /publications/opera
 excerpt: "Y. Hassanzadeh-Nazarabadi, M. Haji Ali and N. Nayal, "Opera: Scalable Simulator for Distributed Systems," IEEE INFOCOM 2021 - IEEE Conference on Computer Communications Workshops (INFOCOM WKSHPS), 2021, pp. 1-2, doi: 10.1109/INFOCOMWKSHPS51825.2021.9484524."
-date: 2021-19-07
+date: 2021-07-19
 venue: 'IEEE Conference on Computer Communications Workshops, INFOCOM Workshops'
 paperurl: #'(https://ieeexplore.ieee.org/abstract/document/9484524'
 citation: #'Y. Hassanzadeh-Nazarabadi, M. Haji Ali and N. Nayal, "Opera: Scalable Simulator for Distributed Systems," IEEE INFOCOM 2021 - IEEE Conference on Computer Communications Workshops (INFOCOM WKSHPS), 2021, pp. 1-2, doi: 10.1109/INFOCOMWKSHPS51825.2021.9484524.'
