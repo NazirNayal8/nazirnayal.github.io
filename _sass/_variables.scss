@@ -28,8 +28,8 @@ $bodoni                     : "Bodoni MT", serif;
 $calisto                    : "Calisto MT", serif;
 $garamond                   : Garamond, serif;
 
-$global-font-family         : $sans-serif;
-$header-font-family         : $sans-serif;
+$global-font-family         : $monospace;
+$header-font-family         : $monospace;
 $caption-font-family        : $serif;
 
 /* type scale */
@@ -54,17 +54,17 @@ $light-gray                 : mix(#fff, $gray, 50%);
 $lighter-gray               : mix(#fff, $gray, 90%);
 
 $body-color                 : #5b6771;
-$background-color           : #F1FFF9;//#FEEFDD; // #ebecf1; // original  e8ded2 // background color
+$background-color           : #18191a;// #F1FFF9;//#FEEFDD; // #ebecf1; // original  e8ded2 // background color
 $code-background-color      : mix(#000, $background-color, 15%);
 $code-background-color-dark : mix(#000, $background-color, 20%);
-$text-color                 : #201E1F; //$dark-gray;
+$text-color                 : #FFFFFF;//#201E1F; //$dark-gray;
 $border-color               : mix(#fff, $background-color, 20%);
 
-$primary-color              : #277552;// #50B2C0; // color of titles of sections
+$primary-color              : #37efb9;// #277552;// #50B2C0; // color of titles of sections
 $success-color              : #62c462;
 $warning-color              : #f89406;
 $danger-color               : #ee5f5b;
-$info-color                 : #70B093; //#FAAA8D;//#13ad7a; // controls link colors
+$info-color                 : #37efb9;// #70B093; //#FAAA8D;//#13ad7a; // controls link colors
 
 /* brands */
 $behance-color              : #1769FF;
