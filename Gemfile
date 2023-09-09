@@ -33,3 +33,5 @@ end
 group :jekyll_plugins do
   gem 'jekyll-graphviz'
 end
+
+gem "webrick", "~> 1.8"
