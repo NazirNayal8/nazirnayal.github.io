@@ -19,7 +19,7 @@ I graduated with a BSc from Koç University Computer Engineering Department and 
 
 # News
 * `04/09/2023` Defended by MSc Thesis titled "RbA: Segmenting Unknown Regions Rejected by All using Mask Classifiers"
-* `15/07/2023` Our paper " [RbA: Segmenting Unknown Regions Rejected by All](https://arxiv.org/abs/2211.14293)" was accepted at ICCV 2023!
+* `15/07/2023` Our paper " [RbA: Segmenting Unknown Regions Rejected by All](https://kuis-ai.github.io/RbA/)" was accepted at ICCV 2023!
 * `13/09/2021` Joined KUIS AI Center as a MSc Student working with [Fatma Güney](https://mysite.ku.edu.tr/fguney/) and [João F. Henriques](https://www.robots.ox.ac.uk/~joao/).
 * `21/12/2021` Joined the AI team of [Hospital on Mobile](https://www.hospitalonmobile.com/) as an intern.
 * `28/12/2020` Finished in 5th place in inzva's Online Programming Contest for Universities.
