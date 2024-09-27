@@ -1,19 +1,11 @@
 ---
-layout: splash
-title: "CV"
+layout: cv
 permalink: /cv/
-author_profile: true
-redirect_from:
-  - /resume
+title: cv
+nav: true
+nav_order: 5
+cv_pdf: example_pdf.pdf
+description: This is a description of the page. You can modify it in '_pages/cv.md'. You can also change or remove the top pdf download button.
+toc:
+  sidebar: left
 ---
-
-{% include base_path %}
-
-
-
-<iframe src="/files/resume.pdf" width="100%" height="1000" frameborder="no" border="0" marginwidth="0" marginheight="0"></iframe>
-
-
-
-
-You may also download a copy of my CV from [here](/files/resume.pdf)
