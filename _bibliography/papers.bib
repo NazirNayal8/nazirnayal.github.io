@@ -6,122 +6,84 @@
  @InProceedings{nayal2023ICCV,
   abbr={ICCV 2023},
   bibtex_show={true},
-  html={https://kuis-ai.github.io/RbA/},
+  website={https://kuis-ai.github.io/RbA/},
   author    = {Nazir Nayal and Mısra Yavuz and João F. Henriques and Fatma Güney},
   title     = {RbA: Segmenting Unknown Regions Rejected by All},
   booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
   year      = {2023},
-  selected  = {true}
+  selected  = {true},
+  code      = {https://github.com/NazirNayal8/RbA},
+  arxiv     = {2211.14293},
+  preview   = {RbA_preview.gif},
+  abstract  = {Standard semantic segmentation models owe their success to curated datasets with a fixed set of semantic categories, without contemplating 
+  the possibility of identifying unknown objects from novel categories. Existing methods in outlier detection suffer from a lack of smoothness and 
+  objectness in their predictions, due to limitations of the per-pixel classification paradigm. Furthermore, additional training for detecting outliers 
+  harms the performance of known classes. In this paper, we explore another paradigm with region-level classification to better segment unknown objects. 
+  We show that the object queries in mask classification tend to behave like one vs. all classifiers. Based on this finding, we propose a novel outlier 
+  scoring function called RbA by defining the event of being an outlier as being rejected by all known classes. Our extensive experiments show that 
+  mask classification improves the performance of the existing outlier detection methods, and the best results are achieved with the proposed RbA. We 
+  also propose an objective to optimize RbA using minimal outlier supervision. Further fine-tuning with outliers improves the unknown performance, and 
+  unlike previous methods, it does not degrade the inlier performance.}
 }
 
-
-@book{einstein1920relativity,
-  title={Relativity: the Special and General Theory},
-  author={Einstein, Albert},
-  year={1920},
-  publisher={Methuen & Co Ltd},
-  html={relativity.html}
-}
-
-@book{einstein1956investigations,
+@article{nayal2024likelihood,
+  title={A Likelihood Ratio-Based Approach to Segmenting Unknown Objects},
+  author={Nayal, Nazir and Shoeb, Youssef and G{\"u}ney, Fatma},
+  journal={arXiv preprint arXiv:2409.06424},
+  year={2024},
   bibtex_show={true},
-  title={Investigations on the Theory of the Brownian Movement},
-  author={Einstein, Albert},
-  year={1956},
-  publisher={Courier Corporation},
-  preview={brownian-motion.gif}
+  abbr={Arxiv},
+  preview={UEM_preview.png},
+  arxiv={2409.06424},
+  selected={true},
+  abstract={Addressing the Out-of-Distribution (OoD) segmentation task is a prerequisite for perception systems
+operating in an open-world environment. Large foundational models are frequently used in downstream tasks, however, their potential for OoD remains mostly unexplored. We seek to leverage a large
+foundational model to achieve robust representation. Outlier supervision is a widely used strategy
+for improving OoD detection of the existing segmentation networks. However, current approaches for
+outlier supervision involve retraining parts of the original network, which is typically disruptive to the
+model’s learned feature representation. Furthermore, retraining becomes infeasible in the case of large
+foundational models. Our goal is to retrain for outlier segmentation without compromising the strong
+representation space of the foundational model. To this end, we propose an adaptive, lightweight
+unknown estimation module (UEM) for outlier supervision that significantly enhances the OoD segmentation performance without affecting the learned feature representation of the original network.
+UEM learns a distribution for outliers and a generic distribution for known classes. Using the learned
+distributions, we propose a likelihood-ratio-based outlier scoring function that fuses the confidence
+of UEM with that of the pixel-wise segmentation inlier network to detect unknown objects. We also
+propose an objective to optimize this score directly. Our approach achieves a new state-of-the-art
+across multiple datasets, outperforming the previous best method by 5.74% average precision points
+while having a lower false-positive rate. Importantly, strong inlier performance remains unaffected.}
 }
 
-@article{einstein1950meaning,
-  abbr={AJP},
-  bibtex_show={true},
-  title={The meaning of relativity},
-  author={Einstein, Albert and Taub, AH},
-  journal={American Journal of Physics},
-  volume={18},
-  number={6},
-  pages={403--404},
-  year={1950},
-  publisher={American Association of Physics Teachers}
-}
 
-@article{PhysRev.47.777,
-  abbr={PhysRev},
-  title={Can Quantum-Mechanical Description of Physical Reality Be Considered Complete?},
-  author={Einstein*†, A. and Podolsky*, B. and Rosen*, N.},
-  abstract={In a complete theory there is an element corresponding to each element of reality. A sufficient condition for the reality of a physical quantity is the possibility of predicting it with certainty, without disturbing the system. In quantum mechanics in the case of two physical quantities described by non-commuting operators, the knowledge of one precludes the knowledge of the other. Then either (1) the description of reality given by the wave function in quantum mechanics is not complete or (2) these two quantities cannot have simultaneous reality. Consideration of the problem of making predictions concerning a system on the basis of measurements made on another system that had previously interacted with it leads to the result that if (1) is false then (2) is also false. One is thus led to conclude that the description of reality as given by a wave function is not complete.},
-  journal={Phys. Rev.},
-  location={New Jersey},
-  volume={47},
-  issue={10},
-  pages={777--780},
-  numpages={0},
-  year={1935},
-  month={May},
-  publisher=aps,
-  doi={10.1103/PhysRev.47.777},
-  url={http://link.aps.org/doi/10.1103/PhysRev.47.777},
-  html={https://journals.aps.org/pr/abstract/10.1103/PhysRev.47.777},
-  pdf={example_pdf.pdf},
-  altmetric={248277},
-  dimensions={true},
-  google_scholar_id={qyhmnyLat1gC},
-  video={https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ},
-  additional_info={. *More Information* can be [found here](https://github.com/alshedivat/al-folio/)},
-  annotation={* Example use of superscripts<br>† Albert Einstein},
+@INPROCEEDINGS{9169463,
+  author={Hassanzadeh-Nazarabadi, Yahya and Nayal, Nazir and Hamdan, Shadi Sameh and Özkasap, Öznur and Küpçü, Alptekin},
+  booktitle={2020 IEEE International Conference on Blockchain and Cryptocurrency (ICBC)}, 
+  title={A containerized proof-of-concept implementation of LightChain system}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={1-2},
+  keywords={Peer-to-peer computing;Middleware;Complexity theory;Message systems;Java;Blockchain;Simulation;Docker;Distributed Hash Tables},
+  doi={10.1109/ICBC48266.2020.9169463},
   selected={false},
-  inspirehep_id = {3255}
-}
-
-@article{einstein1905molekularkinetischen,
-  title={{\"U}ber die von der molekularkinetischen Theorie der W{\"a}rme geforderte Bewegung von in ruhenden Fl{\"u}ssigkeiten suspendierten Teilchen},
-  author={Einstein, A.},
-  journal={Annalen der physik},
-  volume={322},
-  number={8},
-  pages={549--560},
-  year={1905},
-  publisher={Wiley Online Library}
-}
-
-@article{einstein1905movement,
-  abbr={Ann. Phys.},
-  title={Un the movement of small particles suspended in statiunary liquids required by the molecular-kinetic theory 0f heat},
-  author={Einstein, A.},
-  journal={Ann. Phys.},
-  volume={17},
-  pages={549--560},
-  year={1905}
-}
-
-@article{einstein1905electrodynamics,
-  title={On the electrodynamics of moving bodies},
-  author={Einstein, A.},
-  year={1905}
-}
-
-@Article{einstein1905photoelectriceffect,
+  abbr={ICBC 2020},
   bibtex_show={true},
-  abbr={Ann. Phys.},
-  title="{{\"U}ber einen die Erzeugung und Verwandlung des Lichtes betreffenden heuristischen Gesichtspunkt}",
-  author={Albert Einstein},
-  abstract={This is the abstract text.},
-  journal={Ann. Phys.},
-  volume={322},
-  number={6},
-  pages={132--148},
-  year={1905},
-  doi={10.1002/andp.19053220607},
-  award={Albert Einstein receveid the **Nobel Prize in Physics** 1921 *for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect*},
-  award_name={Nobel Prize}
-}
+  arxiv={2007.13203},
+  preview={lightchain.png}
+  }
 
-@book{przibram1967letters,
+@INPROCEEDINGS{9252072,
+  author={Hassanzadeh-Nazarabadi, Yahya and Nayal, Nazir and Hamdan, Shadi Sameh and Şahin, Ali Utkan and Özkasap, Öznur and Küpçü, Alptekin},
+  booktitle={2020 International Symposium on Reliable Distributed Systems (SRDS)}, 
+  title={Demo: Skip Graph Middleware Implementation}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={335-337},
+  keywords={Software architecture;Memory;Routing;Peer-to-peer computing;Reliability;Middleware;Open source software;Skip Graph;Overlay;P2P;Distributed Hash Table;Java;Implementation},
+  doi={10.1109/SRDS51746.2020.00042},
+  selected={false},
+  abbr={SRDS 2020},
   bibtex_show={true},
-  title={Letters on wave mechanics},
-  author={Einstein, Albert and Schrödinger, Erwin and Planck, Max and Lorentz, Hendrik Antoon and Przibram, Karl},
-  year={1967},
-  publisher={Vision},
-  preview={wave-mechanics.gif},
-  abbr={Vision}
-}
+  pdf={skipgraph.pdf},
+  preview={skipgraph.png}
+  }
