@@ -44,7 +44,7 @@ Our task was to implement a proof of concept for this design.
 
 ## Publication
 
-You may find the details of our implementation and architecture in our demo paper [here](https://ieeexplore.ieee.org/document/9169463),
+You may find the details of our implementation and architecture in our demo paper [here](http://arxiv.org/abs/2007.13203),
 which was presented in [IEEE International Conference on Blockchain and Cryptocurrency, 2020](https://icbc2020.ieee-icbc.org/).
 
 You may also have a look at our presentation [here](https://www.youtube.com/watch?v=P7ouoHgf82I&t=2s).

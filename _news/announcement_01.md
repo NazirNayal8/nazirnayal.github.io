@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-Joined the AI team of [Hospital on Mobile](https://www.hospitalonmobile.com/) as an intern
+Joined the AI team of [Hospital on Mobile](https://www.carex.ai/) (now CareX.ai) as an intern

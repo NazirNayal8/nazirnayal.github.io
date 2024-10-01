@@ -37,7 +37,10 @@ so much fun. My interest in NLP grew significantly after this experience.
 
 A variation [Recurrent Neural Networks (RNNs)](https://en.wikipedia.org/wiki/Recurrent_neural_network) which is capable of learning long-term dependencies of sequenced data (Hence the Abbreviation <u>L</u>ong <u>S</u>hort <u>T</u>erm <u>M</u>emory).
 
-  ![LSTM](assets/img/lstm_equations.png)
+
+   <div class="col-sm mt-3 mt-md-0">
+        {% include figure.liquid loading="eager" path="assets/img/lstm_equations.png" title="example image" class="img-fluid rounded z-depth-1" %}
+    </div>
 
 
 If you would like to learn more about LSTMs here is a wonderful [link](http://colah.github.io/posts/2015-08-Understanding-LSTMs/).  
