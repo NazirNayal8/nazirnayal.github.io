@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: nazirnayal8.github.io/sitemap.xml
+Sitemap: nazirnayal.github.io/sitemap.xml
