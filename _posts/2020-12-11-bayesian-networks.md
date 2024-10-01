@@ -7,6 +7,7 @@ tags: ai tutorial
 categories: tutorial
 featured: true
 giscus_comments: true
+toc: false
 ---
 
 # Bayesian Networks
