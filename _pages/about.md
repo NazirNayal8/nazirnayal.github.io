@@ -23,7 +23,7 @@ I am a doctoral researcher at Computer Vision and Machine Learning Department (D
 
 I obtained my Computer Sciences and Engineering MSc degree from Koç University in Istanbul, Turkey, where I was a research fellow at the Koç University & İş Bankası Artificial Intelligence Center (KUIS AI), working under the supervision of [Fatma Güney](https://mysite.ku.edu.tr/fguney/) and [João F. Henriques](https://www.robots.ox.ac.uk/~joao/) from VGG-Oxford.
 
-I graduated with a BSc from Koç University Computer Engineering Department and was a recipient of [Abdulla Al Ghurair Foundation for Education (AGFE)](https://www.alghurairfoundation.org/en) STEM Scholarship.
+I graduated with a BSc from Koç University Computer Engineering Department and was a recipient of [Abdulla Al Ghurair Foundation for Education (AGFE)](https://www.alghurairfoundation.org/about-us/) STEM Scholarship.
 
 ## Research
 

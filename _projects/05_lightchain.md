@@ -24,7 +24,7 @@ The code is available on github [here](https://github.com/NazirNayal8/BrickingBa
 
 ## Code
 
-The code is available on github [here](https://github.com/p2pseala/lightchain-container).
+The code is available on github [here](https://github.com/yhassanzadeh13/lightchain-container).
 
 ## Skills
 
