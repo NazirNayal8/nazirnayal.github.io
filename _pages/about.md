@@ -19,7 +19,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a doctoral researcher at yjr Computer Vision and Machine Learning Department (D2) at the Max Planck Institute for Informatics in Saarbrücken, Germany, and a PhD student at Saarland University as part of the [CS@Max Planck](https://www.cis.mpg.de/) Doctoral Program.
+I am a doctoral researcher at the Computer Vision and Machine Learning Department (D2) at the Max Planck Institute for Informatics in Saarbrücken, Germany, and a PhD student at Saarland University as part of the [CS@Max Planck](https://www.cis.mpg.de/) Doctoral Program.
 
 I obtained my Computer Sciences and Engineering MSc degree from Koç University in Istanbul, Turkey, where I was a research fellow at the Koç University & İş Bankası Artificial Intelligence Center (KUIS AI), working under the supervision of [Fatma Güney](https://mysite.ku.edu.tr/fguney/) and [João F. Henriques](https://www.robots.ox.ac.uk/~joao/) from VGG-Oxford.
 
