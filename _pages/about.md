@@ -6,10 +6,9 @@ subtitle: Doctoral Researcher @ <a href='https://www.mpi-inf.mpg.de/departments/
 
 profile:
   align: right
-  image: personal/graduation_day.jpg
+  image: personal/norway_photo.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>Room 624 </p>
     <p>Max-Planck-Institut für Informatik </p>
     <p>Saarland Informatics Campus </p>
     <p>Campus E1 4 66123 Saarbrücken, Germany</p>
@@ -19,7 +18,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a doctoral researcher at the Computer Vision and Machine Learning Department (D2) at the Max Planck Institute for Informatics in Saarbrücken, Germany, and a PhD student at Saarland University as part of the [CS@Max Planck](https://www.cis.mpg.de/) Doctoral Program.
+I am a doctoral [researcher at the Geometric Representation Learning](https://geometric-rl.mpi-inf.mpg.de/people.html) (GRL) group led by [Jan Eric Lenssen](https://geometric-rl.mpi-inf.mpg.de/people/lenssen.html), which is a part of the Computer Vision and Machine Learning Department at the Max Planck Institute for Informatics in Saarbrücken, Germany, and a PhD student at Saarland University as part of the [CS@Max Planck](https://www.cis.mpg.de/) Doctoral Program.
 
 I obtained my Computer Sciences and Engineering MSc degree from Koç University in Istanbul, Turkey, where I was a research fellow at the Koç University & İş Bankası Artificial Intelligence Center (KUIS AI), working under the supervision of [Fatma Güney](https://mysite.ku.edu.tr/fguney/) and [João F. Henriques](https://www.robots.ox.ac.uk/~joao/) from VGG-Oxford.
 
@@ -27,4 +26,4 @@ I graduated with a BSc from Koç University Computer Engineering Department and 
 
 ## Research
 
-My previous work was mainly on open-world segmentation and uncertainty estimation. Currently focusing on 3D Reconstruction from Sparse Views, diffusion models, and multi-modality.
+My work during my MSc was mainly on open-world segmentation and uncertainty estimation. My current research focuses on improving the efficiency and applicability of diffusion-based generative models to different domains, such as multi-modal generation.
