@@ -2,48 +2,44 @@
 # https://gist.github.com/BryanSchuetz/2ee8c115096d7dd98f294362f6a667db
 module Jekyll
   module CacheBust
-    class CacheDigester
-      require 'digest/md5'
-      require 'pathname'
+    require 'digest/md5'
 
-      attr_accessor :file_name, :directory
+    # main.css is compiled from these sources, so its URL must change whenever any of them does.
+    # (The previous version hashed "assets/_sass", which does not exist: the hash was the MD5 of
+    # an empty string on every build, and browsers kept serving an outdated stylesheet.)
+    CSS_SOURCES = ['_sass/**/*', 'assets/css/main.scss'].freeze
 
-      def initialize(file_name:, directory: nil)
-        self.file_name = file_name
-        self.directory = directory
-      end
-
-      def digest!
-        [file_name, '?', Digest::MD5.hexdigest(file_contents)].join
-      end
-
-      private
-
-      def directory_files_content
-        target_path = File.join(directory, '**', '*')
-        Dir[target_path].map{|f| File.read(f) unless File.directory?(f) }.join
-      end
-
-      def file_content
-        local_file_name = file_name.slice((file_name.index('assets/')..-1))
-        File.read(local_file_name)
-      end
-
-      def file_contents
-        is_directory? ? file_content : directory_files_content
-      end
-
-      def is_directory?
-        directory.nil?
-      end
+    # The stylesheet digest is computed once per build, not once per page.
+    @css_digests = {}
+    class << self
+      attr_reader :css_digests
+    end
+    Jekyll::Hooks.register :site, :post_read do |_site|
+      CacheBust.css_digests.clear
     end
 
     def bust_file_cache(file_name)
-      CacheDigester.new(file_name: file_name, directory: nil).digest!
+      [file_name, '?', Digest::MD5.hexdigest(File.read(local_path(file_name)))].join
     end
 
     def bust_css_cache(file_name)
-      CacheDigester.new(file_name: file_name, directory: 'assets/_sass').digest!
+      source = site_source
+      digest = CacheBust.css_digests[source] ||= begin
+        files = CSS_SOURCES.flat_map { |pattern| Dir[File.join(source, pattern)] }.select { |f| File.file?(f) }.sort
+        raise "cache-bust: no stylesheet sources found under #{source}" if files.empty?
+        Digest::MD5.hexdigest(files.map { |f| File.read(f) }.join)
+      end
+      [file_name, '?', digest].join
+    end
+
+    private
+
+    def site_source
+      @context.registers[:site].source
+    end
+
+    def local_path(file_name)
+      File.join(site_source, file_name.slice(file_name.index('assets/')..-1))
     end
   end
 end
