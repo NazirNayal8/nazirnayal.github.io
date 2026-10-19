@@ -399,9 +399,10 @@
   // model appears as a vector field and drags every dot back until the slabs re-form.
   const latent = (() => {
     const CYCLE = 14;
-    // The data sample: the header portrait, cropped to head and shoulders (fractions of the photo).
+    // The data sample: the header portrait, cropped to head and shoulders (fractions of the photo,
+    // a square for the 4:5 portrait).
     const photo = document.querySelector("[data-denoise-photo] img");
-    const CROP = [0.234, 0.1875, 0.5, 0.5];
+    const CROP = [0.1, 0.05, 0.8, 0.64];
     const IMG = { x0: -1.66, x1: -1.1, y0: 0.06, y1: 0.62, z: 0 };
     const ENC = { x0: -1.0, x1: -0.52, wide: [0.06, 0.62], thin: [0.25, 0.43], wideZ: 0.16, thinZ: 0.07 };
     const SLABS = 4;
@@ -603,6 +604,12 @@
   const topics = Array.from(panel.querySelectorAll("[data-showcase-topic]"));
   const caption = panel.querySelector("[data-showcase-caption]");
   const view = { yaw: -0.32, pitch: 0.3, dist: 4.4, f: 500, cx: 0, cy: 0, cyaw: 1, syaw: 0, cpitch: 1, spitch: 0, noise: 0 };
+  // The background layer: the same scene, larger and faint, fixed behind the page below the band.
+  const backdrop = document.querySelector("[data-showcase-backdrop]");
+  const bgCanvas = backdrop ? backdrop.querySelector("canvas") : null;
+  const bgCtx = bgCanvas ? bgCanvas.getContext("2d") : null;
+  const bgView = { yaw: -0.32, pitch: 0.3, dist: 4.4, f: 500, cx: 0, cy: 0, cyaw: 1, syaw: 0, cpitch: 1, spitch: 0, noise: 0 };
+  const narrow = window.matchMedia("(max-width: 767.98px)");
   const starts = { flow: 0, forecast: 0, plan: 0, latent: 0 };
   let width = 0;
   let height = 0;
@@ -616,6 +623,9 @@
   let frame = null;
   let paused = false;
   let visible = true;
+  let bgWidth = 0;
+  let bgHeight = 0;
+  let bgLevel = 0;
 
   // Each scene runs on its own clock from when it came on, so every story starts at its beginning.
   const local = (name) => (reduced.matches ? STILLS[name] : time - starts[name]);
@@ -636,6 +646,27 @@
     return true;
   };
 
+  const bgLayout = () => {
+    if (!bgCtx) return;
+    const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+    bgWidth = window.innerWidth;
+    bgHeight = window.innerHeight;
+    bgCanvas.width = Math.round(bgWidth * ratio);
+    bgCanvas.height = Math.round(bgHeight * ratio);
+    bgCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    bgView.f = narrow.matches ? bgWidth * 1.05 : Math.min(bgWidth * 0.62, bgHeight * 1.2);
+    bgView.cx = bgWidth * (narrow.matches ? 0.5 : 0.58);
+    bgView.cy = bgHeight * 0.56;
+  };
+
+  // The background fades in as the band leaves the top of the viewport, and stays faint.
+  const bgTarget = () => {
+    if (!bgCtx) return 0;
+    const box = space.getBoundingClientRect();
+    const away = clamp(1 - box.bottom / (window.innerHeight * 0.35), 0, 1);
+    return smooth(away) * (narrow.matches ? 0.1 : 0.14);
+  };
+
   const announce = (index) => {
     const name = ORDER[index];
     topics.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.showcaseTopic === name)));
@@ -649,29 +680,36 @@
     announce(index);
   };
 
-  const paint = () => {
-    if (!width) return;
-    view.yaw = -0.32 + 0.22 * Math.sin((TAU * orbit) / 52);
-    view.pitch = 0.3 + 0.04 * Math.sin((TAU * orbit) / 37);
-    view.cyaw = Math.cos(view.yaw);
-    view.syaw = Math.sin(view.yaw);
-    view.cpitch = Math.cos(view.pitch);
-    view.spitch = Math.sin(view.pitch);
-    ctx = own;
-    cam = view;
-    ctx.clearRect(0, 0, width, height);
-    view.noise = 0;
-    grid(0.6, -1.8, 1.8, 0.95);
+  // Draw the current scene (or the dissolve between two) into one canvas at a given strength.
+  const draw = (target, v, w, h, level) => {
+    v.yaw = -0.32 + 0.22 * Math.sin((TAU * orbit) / 52);
+    v.pitch = 0.3 + 0.04 * Math.sin((TAU * orbit) / 37);
+    v.cyaw = Math.cos(v.yaw);
+    v.syaw = Math.sin(v.yaw);
+    v.cpitch = Math.cos(v.pitch);
+    v.spitch = Math.sin(v.pitch);
+    ctx = target;
+    cam = v;
+    ctx.clearRect(0, 0, w, h);
+    if (level < 0.004) return;
+    const jitter = NOISE * (v.f / Math.max(1, view.f));
+    v.noise = 0;
+    grid(0.6 * level, -1.8, 1.8, 0.95);
     if (blend < 1) {
       const p = smooth(blend);
-      view.noise = NOISE * p;
-      SCENES[ORDER[current]](local(ORDER[current]), 1 - p);
-      view.noise = NOISE * (1 - p);
-      SCENES[ORDER[next]](local(ORDER[next]), p);
-      view.noise = 0;
+      v.noise = jitter * p;
+      SCENES[ORDER[current]](local(ORDER[current]), (1 - p) * level);
+      v.noise = jitter * (1 - p);
+      SCENES[ORDER[next]](local(ORDER[next]), p * level);
+      v.noise = 0;
     } else {
-      SCENES[ORDER[current]](local(ORDER[current]), 1);
+      SCENES[ORDER[current]](local(ORDER[current]), level);
     }
+  };
+
+  const paint = () => {
+    if (width && visible) draw(own, view, width, height, 1);
+    if (bgCtx && bgWidth) draw(bgCtx, bgView, bgWidth, bgHeight, bgLevel);
   };
 
   const advance = (dt) => {
@@ -694,17 +732,24 @@
     if (last === null || dt >= 1 / 40) {
       last = now;
       advance(Math.min(dt, 0.1));
+      bgLevel = lerp(bgLevel, bgTarget(), 1 - Math.exp(-Math.min(dt, 0.1) * 6));
       paint();
     }
     frame = window.requestAnimationFrame(tick);
   };
+  // Animate while either the band or the background is on screen.
+  const shouldRun = () => !reduced.matches && !paused && !document.hidden && (visible || bgTarget() > 0.004);
   const sync = () => {
     if (frame !== null) window.cancelAnimationFrame(frame);
     frame = null;
     last = null;
     if (toggle) toggle.hidden = reduced.matches;
-    if (!reduced.matches && !paused && visible && !document.hidden) frame = window.requestAnimationFrame(tick);
-    else paint();
+    if (shouldRun()) {
+      frame = window.requestAnimationFrame(tick);
+    } else {
+      bgLevel = bgTarget();
+      paint();
+    }
   };
 
   if (toggle) {
@@ -750,6 +795,18 @@
       if (layout()) paint();
     });
   }
+  window.addEventListener("resize", () => {
+    bgLayout();
+    if (frame === null) paint();
+  });
+  window.addEventListener("scroll", () => {
+    if ((frame !== null) !== shouldRun()) sync();
+    else if (frame === null) {
+      bgLevel = bgTarget();
+      paint();
+    }
+  }, { passive: true });
+  if (narrow.addEventListener) narrow.addEventListener("change", bgLayout);
   document.addEventListener("visibilitychange", sync);
   document.addEventListener("motifs:palette", () => {
     if (frame === null) paint();
@@ -759,7 +816,9 @@
 
   // Show the panel before measuring the band.
   panel.hidden = false;
+  if (backdrop) backdrop.classList.add("is-live");
   layout();
+  bgLayout();
   announce(0);
   sync();
 })();
