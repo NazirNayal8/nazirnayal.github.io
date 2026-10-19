@@ -5,7 +5,9 @@ layout: default
   {% comment %}
     The header: name and statement beside the photo and contact details, then a wide band below
     with the research showcase (assets/js/home.js), which plays the problems one after another.
+    Once the band scrolls away, the same scene continues faintly in a fixed layer behind the page.
   {% endcomment %}
+  <div class="showcase-backdrop" data-showcase-backdrop aria-hidden="true"><canvas></canvas></div>
   <header class="post-header about-header">
     <div class="about-heading">
       <h1 class="post-title">

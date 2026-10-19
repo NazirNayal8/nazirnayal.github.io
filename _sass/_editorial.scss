@@ -352,8 +352,21 @@ body.editorial-site {
 @media (scripting: none) { .editorial-site .motif, .denoise-progress { display: none !important; } }
 
 // Home: the research showcase (assets/js/home.js) is a wide band drawn into its own canvas.
-body.page-about .site-main { margin-top: 28px; overflow-x: clip; }
-@media (scripting: none) { .showcase-panel { display: none !important; } }
+// Below the band, the same scene continues faintly in a fixed layer behind the text. Inside
+// main's stacking context the layer sits behind the content; the footer covers it.
+body.page-about .site-main { position: relative; z-index: 1; margin-top: 28px; overflow-x: clip; }
+body.page-about footer { position: relative; z-index: 1; }
+.showcase-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: none;
+  pointer-events: none;
+  &.is-live { display: block; }
+  canvas { display: block; width: 100%; height: 100%; }
+}
+@media (scripting: none) { .showcase-panel, .showcase-backdrop { display: none !important; } }
+@media print { .showcase-backdrop { display: none !important; } }
 
 .about-page .about-header { position: relative; }
 .about-page .about-heading { position: relative; z-index: 1; }
@@ -795,13 +808,25 @@ body.page-about .site-main { margin-top: 28px; overflow-x: clip; }
   &:hover .project-thumb { --lift: -3px; border-color: var(--global-theme-color); }
 }
 
-@keyframes denoise-grain {
-  0% { background-position: 0 0; }
-  25% { background-position: -64px 38px; }
-  50% { background-position: 47px -71px; }
-  75% { background-position: -23px -29px; }
-  100% { background-position: 0 0; }
+// Scroll reveals as denoising (assets/js/reveal.js). The real text keeps its place with transparent
+// glyphs (borders, underlines and icons stay); an overlay draws each character on its measured box.
+.dd-unit, .dd-unit * { -webkit-text-fill-color: transparent; }
+.dd-unit i, .dd-unit i::before { -webkit-text-fill-color: currentColor; }
+.dd-host { position: relative; }
+.dd-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; user-select: none; }
+.dd-g {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: normal;
+  letter-spacing: 0;
+  white-space: pre;
+  -webkit-text-fill-color: currentColor;
 }
+.dd-g.is-noise { text-align: center; color: var(--global-theme-color) !important; }
+.dd-media { filter: blur(var(--dd-blur, 0px)); }
+.dd-noise { position: absolute; z-index: 1; pointer-events: none; background-size: 96px 96px; }
 
 @keyframes editorial-enter {
   from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
@@ -811,29 +836,6 @@ body.page-about .site-main { margin-top: 28px; overflow-x: clip; }
 @media (prefers-reduced-motion: no-preference) {
   .editorial-site .post-header, .editorial-site .header-bar, .editorial-site d-title { animation: editorial-enter 700ms var(--editorial-ease) both; }
   .editorial-site .about-intro { animation: editorial-enter 800ms 100ms var(--editorial-ease) both; }
-  // Sections are denoised into view: grain, blur and faded ink resolve in steps, like a sampler.
-  .reveal-ready {
-    position: relative;
-    opacity: 0.3;
-    transform: perspective(1200px) rotateX(-4deg) translateY(16px);
-    transform-origin: 50% 0;
-    filter: blur(7px);
-    transition: opacity 1000ms var(--editorial-ease), transform 1000ms var(--editorial-ease), filter 1200ms steps(10, end);
-  }
-  .reveal-ready::after {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    z-index: 2;
-    pointer-events: none;
-    background-image: var(--denoise-grain, none);
-    background-size: 180px 180px;
-    opacity: 0.95;
-    transition: opacity 1200ms steps(10, end);
-    animation: denoise-grain 0.4s steps(4) infinite;
-  }
-  .reveal-ready.is-visible { opacity: 1; transform: none; filter: none; }
-  .reveal-ready.is-visible::after { opacity: 0; }
 }
 
 // Theme changes affect colors only, keeping layout and motion stable.
@@ -930,7 +932,6 @@ html.transition, html.transition *, html.transition *::before, html.transition *
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .reveal-ready { opacity: 1; transform: none; filter: none; }
   .editorial-site .project-step:hover .project-thumb, .editorial-site .affiliations .affiliation-link:hover .affiliation-logo { --lift: 0px; }
   .editorial-site .publications ol.bibliography > li:hover .preview { transform: none; }
 }

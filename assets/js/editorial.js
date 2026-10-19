@@ -10,58 +10,6 @@
   updateNavbar();
   window.addEventListener("scroll", updateNavbar, { passive: true });
 
-  // Grain for the denoising reveal: a small tile of ink and accent speckles in the current theme.
-  const paintGrain = () => {
-    const size = 180;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const style = getComputedStyle(document.documentElement);
-    const toRgb = (value) => {
-      ctx.fillStyle = "#000";
-      ctx.fillStyle = value;
-      const hex = ctx.fillStyle;
-      return hex.charAt(0) === "#" ? [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) : [0, 0, 0];
-    };
-    const ink = toRgb(style.getPropertyValue("--global-text-color").trim() || "#23332e");
-    const accent = toRgb(style.getPropertyValue("--global-theme-color").trim() || "#087f83");
-    const image = ctx.createImageData(size, size);
-    for (let i = 0; i < image.data.length; i += 4) {
-      const roll = Math.random();
-      if (roll > 0.5) continue;
-      const rgb = roll < 0.16 ? accent : ink;
-      const strength = Math.sqrt(-2 * Math.log(Math.random() || 1e-6));
-      image.data[i] = rgb[0];
-      image.data[i + 1] = rgb[1];
-      image.data[i + 2] = rgb[2];
-      image.data[i + 3] = Math.min(255, 105 * strength);
-    }
-    ctx.putImageData(image, 0, 0);
-    document.documentElement.style.setProperty("--denoise-grain", `url(${canvas.toDataURL("image/png")})`);
-  };
-
-  // Only elements below the initial viewport are eligible for scroll reveals.
-  if (!reducedMotion.matches && "IntersectionObserver" in window) {
-    paintGrain();
-    new MutationObserver(paintGrain).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-visible");
-        revealObserver.unobserve(entry.target);
-      });
-    }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
-    document.querySelectorAll(".home-section, ol.bibliography > li, .project-step, .post-list > li, .cv > .card").forEach((element) => {
-      if (element.getBoundingClientRect().top < window.innerHeight) return;
-      // Nested items (papers inside a home section) denoise with their section, not twice.
-      if (element.parentElement && element.parentElement.closest(".reveal-ready")) return;
-      element.classList.add("reveal-ready");
-      revealObserver.observe(element);
-    });
-  }
-
   // Keyboard support for the existing abstract / BibTeX / award controls.
   document.querySelectorAll(".publications .links a.abstract, .publications .links a.bibtex, .publications .links a.award").forEach((control) => {
     control.setAttribute("role", "button");
