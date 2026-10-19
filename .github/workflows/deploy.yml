@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - "assets/**"
+      - "_data/**"
+      - "_plugins/**"
+      - "_sass/**"
       - "**.bib"
       - "**.html"
       - "**.js"
@@ -34,6 +37,9 @@ on:
       - main
     paths:
       - "assets/**"
+      - "_data/**"
+      - "_plugins/**"
+      - "_sass/**"
       - "**.bib"
       - "**.html"
       - "**.js"
