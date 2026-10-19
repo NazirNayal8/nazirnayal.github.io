@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: A Dive into 3D Reconstruction Literature
+title: A dive into 3D reconstruction literature
 description: A summary and literature review of the solutions proposed to solve the 3D reconstruction problem
 tags: ai literature-review 3d computer-vision
 giscus_comments: true
@@ -14,7 +14,7 @@ authors:
     affiliations:
       name: MPI-INF
 
-bibliography: 2024-10-04-a-dive-into-3d-reconstruction.bib
+bibliography: 2024-10-09-a-dive-into-3d-reconstruction.bib
 
 toc:
   - sidebar: left
@@ -27,25 +27,25 @@ toc:
 
 ---
 
-# What is the problem we are solving ?
+# What is the problem we are solving?
 
     The end goal of this area is to find ways to generate reliable representations for 3D scenes which can be used in different applications. The methods in this literature seek ways to build this representation. Most of these methods differ in terms of what kind of data is used to learn the 3D representations. Some tackle the problem using many 2D images of the same view, and other then try to generate the 3D representation by using fewer and fewer 2D images for efficiency and to overcome data scarcity.
 
 
-# 3D Representations
+# 3D representations
 
 - Meshes
-- Point Clouds
+- Point clouds
 - NeRF
-- Gaussian Splats
+- Gaussian splats
 
 
-# Methods based on Density of views
+# Methods based on density of views
 
-## Dense Views
+## Dense views
 
-## Sparse Views
+## Sparse views
 
-# Per-Scene vs. Cross-Scene Methods
+# Per-scene vs. cross-scene methods
 
     Some existing methods optimize a model for a specific scene only, while other methods utilize large datasets to learn a strong prior such that a 3D scene representation can be achieved with a single forward pass.

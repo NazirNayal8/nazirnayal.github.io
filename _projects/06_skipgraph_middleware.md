@@ -1,50 +1,26 @@
 ---
 layout: page
-title: Skip Graph Middlware Implementation
-description: Open-Source Implementation of Skip Graph Middelware.
+title: "SkipGraph middleware"
+description: "A distributed SkipGraph implementation with node insertion and identifier-based search over Java RMI."
 img: assets/img/publication_preview/skipgraph.png
 importance: 3
 category: research
 related_publications: false
+github: https://github.com/NazirNayal8/SkipGraph
 ---
 
-## Code
+## Overview
 
-The code is available on github [here](https://github.com/NazirNayal8/BrickingBad).
-
-## Skills
-
-* Software Engineering
-* Software Patterns
-* Java
-* Teamwork
-* Agile Development
-
-## About
+A Java RMI implementation of the SkipGraph distributed data structure. Nodes maintain neighbor connections and support insertion, numeric identifier lookups, and name identifier searches across the network.
 
 ## Code
 
-The code is available on github [here](https://github.com/yhassanzadeh13/lightchain-container).
-
-## Skills
-
-* Java
-* Blockchain
-* Distributed Data Structures
-* Software Engineering
-
-## About
-
-The project is part of the project of the Distributed Systems and Reliable Networks Research Lab (DISNET) at Koç University.
-
-[LightChain](https://arxiv.org/abs/1904.00375) is a DHT-Based Blockchain implemented over a
-[Skip Graph](https://dl.acm.org/doi/10.1145/1290672.1290674) overlay. It was designed but the DISNET Lab, and it has several state of the art features.
-
-Our task was to implement a proof of concept for this design.
+[Explore the SkipGraph repository](https://github.com/NazirNayal8/SkipGraph).
 
 ## Publication
 
-You may find the details of our implementation and architecture in our demo paper [here](http://arxiv.org/abs/2007.13203),
-which was presented in [IEEE International Conference on Blockchain and Cryptocurrency, 2020](https://icbc2020.ieee-icbc.org/).
+[Demo: Skip Graph Middleware Implementation](https://doi.org/10.1109/SRDS51746.2020.00042), SRDS 2020. The downloadable [demo paper](/assets/pdf/skipgraph.pdf) describes the middleware implementation.
 
-You may also have a look at our presentation [here](https://www.youtube.com/watch?v=P7ouoHgf82I&t=2s).
+## Technologies
+
+Java · Java RMI · Distributed data structures

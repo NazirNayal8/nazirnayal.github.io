@@ -216,25 +216,25 @@
     {% capture link %}https://www.zotero.org/{{ site.zotero_username }}{% endcapture %}
     {% assign sameaslinks = sameaslinks | push: link %}
   {% endif %}
-  {% if sameaslinks != blank %}
-    {% assign sameaslinks = sameaslinks | split: '' %}
-  {% endif %}
-
+  {% comment %} Every value goes through jsonify, so newlines and quotes stay valid JSON. {% endcomment %}
+  {% capture schema_description %}{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}{% endcapture %}
+  {% capture schema_headline %}{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}{% endcapture %}
+  {% assign schema_url = page.url | prepend: site.baseurl | prepend: site.url | remove_first: 'index.html' %}
   <script type="application/ld+json">
     {
         "author":
         {
             "@type": "Person",
-            "name": "{{ author_name }}"
+            "name": {{ author_name | strip | jsonify }}
         },
-        "url": "{{ page.url | prepend: site.baseurl | prepend: site.url }}",
+        "url": {{ schema_url | jsonify }},
         "@type": "{% if is_blog_post %}BlogPosting{% else %}WebSite{% endif %}",
-        "description": "{% if page.description %}{{ page.description }}{% else if site.description %}{{ site.description }}{% endif %}",
-        "headline": "{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}",
+        "description": {{ schema_description | strip | jsonify }},
+        "headline": {{ schema_headline | strip | jsonify }},
         {% if sameaslinks != blank %}
-        "sameAs": {{ sameaslinks }},
+        "sameAs": {{ sameaslinks | jsonify }},
         {% endif %}
-        "name": "{{ author_name }}",
+        "name": {{ author_name | strip | jsonify }},
         "@context": "https://schema.org"
     }
   </script>

@@ -1,65 +1,29 @@
 ---
 layout: page
-title: projects
+title: Projects
 permalink: /projects/
-description: showcasing my projects that I have enjoyed working on
+description: Research and software projects I have enjoyed working on.
 nav: true
 nav_order: 2
 display_categories: [research, university, side-hustle]
-horizontal: false
+motif: plan
 ---
 
-<!-- pages/projects.md -->
-<div class="projects">
-{% if site.enable_project_categories and page.display_categories %}
-  <!-- Display categorized projects -->
-  {% for category in page.display_categories %}
-  <a id="{{ category }}" href=".#{{ category }}">
-    <h2 class="category">{{ category }}</h2>
-  </a>
-  {% assign categorized_projects = site.projects | where: "category", category %}
-  {% assign sorted_projects = categorized_projects | sort: "importance" %}
-  <!-- Generate cards for each project -->
-  {% if page.horizontal %}
-  <div class="container">
-    <div class="row row-cols-1 row-cols-md-2">
-    {% for project in sorted_projects %}
-      {% include projects_horizontal.liquid %}
-    {% endfor %}
-    </div>
-  </div>
-  {% else %}
-  <div class="row row-cols-1 row-cols-md-3">
-    {% for project in sorted_projects %}
-      {% include projects.liquid %}
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endfor %}
-
-{% else %}
-
-<!-- Display projects without categories -->
-
-{% assign sorted_projects = site.projects | sort: "importance" %}
-
-  <!-- Generate cards for each project -->
-
-{% if page.horizontal %}
-
-  <div class="container">
-    <div class="row row-cols-1 row-cols-md-2">
-    {% for project in sorted_projects %}
-      {% include projects_horizontal.liquid %}
-    {% endfor %}
-    </div>
-  </div>
-  {% else %}
-  <div class="row row-cols-1 row-cols-md-3">
-    {% for project in sorted_projects %}
-      {% include projects.liquid %}
-    {% endfor %}
-  </div>
-  {% endif %}
-{% endif %}
+<!-- pages/projects.md: one numbered timeline, grouped by category and ordered by importance. -->
+<div class="projects project-sequence">
+{% assign step = 0 %}
+{% for category in page.display_categories %}
+{% assign categorized_projects = site.projects | where: "category", category %}
+{% if categorized_projects.size == 0 %}{% continue %}{% endif %}
+{% assign sorted_projects = categorized_projects | sort: "importance" %}
+<section class="project-group" aria-labelledby="projects-{{ category }}">
+<h2 class="category" id="projects-{{ category }}">{{ category | replace: '-', ' ' | capitalize }}</h2>
+<ol class="project-timeline" data-project-timeline start="{{ step | plus: 1 }}">
+{% for project in sorted_projects %}
+{% assign step = step | plus: 1 %}
+{% include project_step.liquid project=project step=step %}
+{% endfor %}
+</ol>
+</section>
+{% endfor %}
 </div>

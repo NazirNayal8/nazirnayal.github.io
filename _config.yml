@@ -8,16 +8,15 @@ middle_name:
 last_name: Nayal
 email: nnayal@mpi-inf.mpg.de
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
-  A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+  Doctoral researcher at the Max Planck Institute for Informatics working on diffusion and flow-based generative models and world models.
 footer_text: >
   Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
-  Photos from <a href="https://unsplash.com" target="_blank">Unsplash</a>.
 keywords: nazir, nayal, KU, mpi, mpi-inf, mpi-sws, AI, deep learning # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
-icon: ⚛️ # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
+icon: favicon.svg
 
-url: nazirnayal.github.io # the base hostname & protocol for your site
+url: https://nazirnayal.xyz # the base hostname & protocol for your site
 baseurl: "" # the subpath of your site, e.g. /blog/. Leave blank for root
 last_updated: false # set to true if you want to display last updated in the footer
 impressum_path: # set to path to include impressum link in the footer, use the same path as permalink in a page, helps to conform with EU GDPR
@@ -48,13 +47,13 @@ rss_icon: true
 # -----------------------------------------------------------------------------
 
 navbar_fixed: true
-footer_fixed: true
+footer_fixed: false
 search_enabled: true
 socials_in_search: true
 bib_search: true
 
 # Dimensions
-max_width: 930px
+max_width: 1120px
 
 # TODO: add layout settings (single page vs. multi-page)
 
@@ -63,9 +62,9 @@ max_width: 930px
 # -----------------------------------------------------------------------------
 # Display links to the page with a preview object on social media.
 # see https://schema.org/docs/faq.html for more information
-serve_og_meta: false # Include Open Graph meta tags in the HTML head
-serve_schema_org: false # Include Schema.org in the HTML head
-og_image: # The site-wide (default for all links) Open Graph preview image
+serve_og_meta: true # Include Open Graph meta tags in the HTML head
+serve_schema_org: true # Include Schema.org in the HTML head
+og_image: https://nazirnayal.xyz/assets/img/personal/norway_photo.jpg # The site-wide (default for all links) Open Graph preview image
 
 # -----------------------------------------------------------------------------
 # Social integration
@@ -124,6 +123,9 @@ contact_note: >
 google_analytics: # your Google Analytics measurement ID (format: G-XXXXXXXXXX)
 cronitor_analytics: # cronitor RUM analytics site ID (format: XXXXXXXXX)
 pirsch_analytics: # your Pirsch analytics site ID (length 32 characters)
+# Public beacon token from Cloudflare Web Analytics > Manage site.
+# https://developers.cloudflare.com/web-analytics/get-started/
+cloudflare_analytics: "204fdedc501745858f13fb69c7bb27ce"
 
 # For Google Search Console, see https://support.google.com/webmasters/answer/9008080?hl=en#meta_tag_verification&zippy=%2Chtml-tag
 google_site_verification: # your google-site-verification ID (Google Search Console)
@@ -134,7 +136,7 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # -----------------------------------------------------------------------------
 
 blog_name: The Paths # blog_name will be displayed in your blog page
-blog_description: a writing space to lead the way
+blog_description: A writing space to lead the way
 permalink: /blog/:year/:title/
 lsi: false # produce an index for related posts
 
@@ -230,6 +232,8 @@ kramdown:
 include: ["_pages"]
 exclude:
   - bin/
+  - WEBSITE_REVIEW.md
+  - AGENTS.md
   - CONTRIBUTING.md
   - CUSTOMIZE.md
   - Dockerfile
@@ -244,6 +248,20 @@ exclude:
   - package.json
   - package-lock.json
   - _pages/about_einstein.md
+  - _pages/profiles.md
+  - _pages/teaching.md
+  - _pages/dropdown.md
+  - _projects/zzz2_project.md
+  - _projects/zzz3_project.md
+  - _projects/zzz4_project.md
+  - _projects/zzz5_project.md
+  - _projects/zzz6_project.md
+  - _projects/zzz7_project.md
+  - _projects/zzz8_project.md
+  - _projects/zzz9_project.md
+  - assets/jupyter/
+  - assets/pdf/example_pdf.pdf
+  - assets/json/table_data.json
   - purgecss.config.js
   - README.md
   - readme_preview/
@@ -278,6 +296,11 @@ defaults:
       path: "assets"
     values:
       sitemap: false
+  - scope:
+      path: ""
+      type: projects
+    values:
+      motif: toy
 
 sass:
   style: compressed
@@ -363,6 +386,7 @@ filtered_bibtex_keywords:
     google_scholar_id,
     html,
     inspirehep_id,
+    openreview,
     pdf,
     poster,
     preview,
@@ -429,6 +453,7 @@ lazy_loading_images: true # enables lazy loading of images (recommended)
 enable_google_analytics: false # enables google analytics
 enable_cronitor_analytics: false # enables cronitor RUM analytics
 enable_pirsch_analytics: false # enables Pirsch analytics (https://pirsch.io/)
+enable_cloudflare_analytics: true # requires a token; only runs on the production hostname
 enable_google_verification: false # enables google site verification
 enable_bing_verification: false # enables bing site verification
 enable_masonry: true # enables automatic project cards arrangement
@@ -490,7 +515,7 @@ third_party_libraries:
     version: "5.5.0"
   google_fonts:
     url:
-      fonts: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&display=swap"
+      fonts: "https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;550;600;650;700&family=Geist+Mono:wght@400;500&display=swap"
   highlightjs:
     integrity:
       css:

@@ -1,0 +1,68 @@
+{% assign pdf_url = page.cv_pdf | prepend: '/assets/pdf/' | relative_url %}
+<div class="post cv-page" data-cv>
+  <header class="post-header has-motif">
+    <div class="post-header-copy">
+      <h1 class="post-title">{{ page.title }}</h1>
+      {% if page.description %}<p class="post-description">{{ page.description }}</p>{% endif %}
+      <a class="cv-download" href="{{ pdf_url }}" download><i class="ti ti-download" aria-hidden="true"></i> Download PDF</a>
+    </div>
+    {% include motif.liquid name='portrait' class='motif-portrait' %}
+  </header>
+
+  <div class="cv-controls" hidden>
+    <label class="sr-only" for="cv-search">Search CV</label>
+    <input type="search" id="cv-search" placeholder="Search roles, skills, or institutions" autocomplete="off">
+    <div class="cv-expand-controls">
+      <button type="button" data-cv-expand>Expand all</button>
+      <button type="button" data-cv-collapse>Collapse all</button>
+    </div>
+  </div>
+  <p class="cv-search-status sr-only" role="status" aria-live="polite"></p>
+
+  <div class="cv-layout">
+    <nav class="cv-section-nav" aria-label="CV sections">
+      {% for section in site.data.cv_pdf.sections %}
+        <a href="#cv-{{ section.id }}">{{ section.title }}</a>
+      {% endfor %}
+    </nav>
+
+    <article class="cv-document">
+      {% for section in site.data.cv_pdf.sections %}
+        <details class="cv-section" id="cv-{{ section.id }}" open>
+          <summary><h2>{{ section.title }}</h2><i class="ti ti-chevron-down" aria-hidden="true"></i></summary>
+          <div class="cv-section-content">
+            {% if section.kind == 'entries' %}
+              {% for item in section.items %}
+                <div class="cv-entry" data-cv-item>
+                  <div class="cv-entry-heading">
+                    <h3>{{ item.title | escape }}</h3>
+                    <p class="cv-date">{{ item.date | escape }}</p>
+                  </div>
+                  <p class="cv-role">{{ item.subtitle | escape }}</p>
+                  <p class="cv-location">{{ item.location | escape }}</p>
+                  {% if item.bullets.size > 0 %}
+                    <ul>{% for bullet in item.bullets %}<li>{{ bullet | escape }}</li>{% endfor %}</ul>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% elsif section.kind == 'list' %}
+              <ul class="cv-item-list">
+                {% for item in section.items %}<li data-cv-item>{{ item | escape }}</li>{% endfor %}
+              </ul>
+            {% else %}
+              <p data-cv-item>{{ section.text | escape }}</p>
+              {% if section.id == 'projects' %}<a href="{{ '/projects/' | relative_url }}">Explore projects <span aria-hidden="true">↗</span></a>{% endif %}
+            {% endif %}
+          </div>
+        </details>
+      {% endfor %}
+
+      <p class="cv-no-results" hidden>No matching CV entries. Try another search.</p>
+
+      <details class="cv-source-contact">
+        <summary>Contact details in the PDF</summary>
+        {% for line in site.data.cv_pdf.header %}<p>{{ line | escape }}</p>{% endfor %}
+      </details>
+    </article>
+  </div>
+</div>

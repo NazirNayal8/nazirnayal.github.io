@@ -1,24 +1,25 @@
 ---
 layout: page
-title: Bricking Bad Brick Breaking Game
-description: An exciting desktop game with bricks, aliens, power-ups, and more interesting stuff.
+title: "Bricking Bad"
+description: "A Java brick-breaking game with aliens, power-ups, and a map editor."
 img: assets/img/bricking_bad_1.png
 importance: 3
 category: university
 related_publications: false
+github: https://github.com/NazirNayal8/BrickingBad
 ---
 
 ## Code
 
-The code is available on github [here](https://github.com/NazirNayal8/BrickingBad).
+The code is available on GitHub [here](https://github.com/NazirNayal8/BrickingBad).
 
 ## Skills
 
-* Software Engineering
-* Software Patterns
+* Software engineering
+* Software patterns
 * Java
 * Teamwork
-* Agile Development
+* Agile development
 
 ## About
 

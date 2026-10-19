@@ -1,22 +1,23 @@
 ---
 layout: page
-title: Air Traffic Control Simulation
-description: Simulating air traffic control in an airport modeled as a resource allocation problem.
+title: "Air traffic control simulation"
+description: "A C++ airport simulation that coordinates runway requests with POSIX threads."
 img: assets/img/air-traffic.jpg
 importance: 3
 category: university
 related_publications: false
+github: https://github.com/NazirNayal8/air-traffic-control-with-pthreads
 ---
 
 ## Code
 
-The code is available on github [here](https://github.com/NazirNayal8/air-traffic-control-with-pthreads).
+The code is available on GitHub [here](https://github.com/NazirNayal8/air-traffic-control-with-pthreads).
 
 ## Skills
 
 * C++
-* Multi-Threading
-* Problem Solving
+* Multithreading
+* Problem solving
 
 ## About
 

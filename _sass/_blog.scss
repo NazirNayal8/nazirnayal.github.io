@@ -1,0 +1,26 @@
+.editorial-site .blog-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 70px 24px;
+  margin-bottom: 10px;
+  text-align: center;
+
+  .blog-hero-copy { position: relative; z-index: 1; }
+  h1 { margin: 0 0 18px; font-size: clamp(2.8rem, 6vw, 4.5rem); }
+  h2 { margin: 0; color: var(--global-text-color); font-size: 1rem; }
+  // Sample paths of a reverse diffusion run behind the title (assets/js/motifs.js).
+  .motif-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    canvas { height: 100%; }
+    .motif-caption { position: absolute; right: 14px; bottom: 12px; display: block; min-height: 0; margin: 0; }
+    .motif-label { display: none; }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .editorial-site .blog-hero { padding: 70px 12px; }
+  .editorial-site .blog-hero h2 { max-width: 25ch; margin: 0 auto; line-height: 1.8; }
+}

@@ -1,8 +1,9 @@
 ---
 layout: page
 permalink: /publications/
-title: publications
+title: Publications
 description: All of my publications in chronological order.
+motif: mixflow
 nav: true
 nav_order: 1
 ---

@@ -1,6 +1,9 @@
 ---
 layout: default
 ---
+{% if page.interactive_pdf and site.data.cv_pdf %}
+  {% include cv_pdf.liquid %}
+{% else %}
 {% unless site.data.resume %}
   <div class="post">
     <header class="post-header">
@@ -115,3 +118,4 @@ layout: default
     </article>
   </div>
 {% endunless %}
+{% endif %}

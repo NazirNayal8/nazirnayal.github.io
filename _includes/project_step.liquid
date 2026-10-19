@@ -1,0 +1,21 @@
+{% comment %} One step of the projects timeline. Parameters: project, step (1-based). {% endcomment %}
+{% assign project = include.project %}
+{% capture project_href %}{% if project.redirect %}{{ project.redirect }}{% else %}{{ project.url | relative_url }}{% endif %}{% endcapture %}
+<li class="project-step" data-project-step>
+  <span class="project-node" aria-hidden="true">{% if include.step < 10 %}0{% endif %}{{ include.step }}</span>
+  <div class="project-body">
+    <h3 class="project-title"><a href="{{ project_href }}">{{ project.title }}</a></h3>
+    <p class="project-description">{{ project.description }}</p>
+    <p class="project-actions">
+      <a href="{{ project_href }}">{% if project.redirect %}Project site{% else %}Details{% endif %}</a>
+      {% if project.github %}
+        <a href="{{ project.github }}" aria-label="Code for {{ project.title | escape }}"><i class="fa-brands fa-github" aria-hidden="true"></i> Code</a>
+      {% endif %}
+    </p>
+  </div>
+  {% if project.img %}
+    <a class="project-thumb" href="{{ project_href }}" tabindex="-1" aria-hidden="true">
+      <img src="{{ project.img | relative_url }}" alt="" loading="lazy" decoding="async">
+    </a>
+  {% endif %}
+</li>

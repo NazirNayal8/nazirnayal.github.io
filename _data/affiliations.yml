@@ -1,0 +1,53 @@
+# display_height balances optical size across wordmarks and square marks (CSS pixels).
+# logo_dark is shown in the dark theme. Each entry notes its source: official variants, variants
+# the institution's guidelines permit, and (Oxford) official artwork rearranged without its box.
+
+- name: Max Planck Institute for Informatics
+  url: https://www.mpi-inf.mpg.de/
+  logo: assets/img/institutions/max-planck.svg
+  # White recolor of the same artwork. The Max Planck logo guide allows the logo
+  # "in schwarz, grau oder weiß negativ" depending on the background.
+  logo_dark: assets/img/institutions/max-planck-white.svg
+  width: 1527
+  height: 300
+  display_height: 40
+  # Official institute header artwork, retrieved 18 October 2026.
+  source: https://www.mpi-inf.mpg.de/_assets/b6d065e67ef27faaf8c79f43e86e8476/Images/Core/mpi-logo-en.svg
+  source_dark_rule: https://www.mpikg.mpg.de/6339023/Logo-Guide-Print-_-Max-Planck-Gesellschaft.pdf
+
+- name: Saarland University
+  url: https://www.uni-saarland.de/en/home.html
+  logo: assets/img/institutions/saarland.svg
+  # White recolor of the same artwork. The 2026 UdS style guide (p. 7, "Logo – Farbigkeit")
+  # allows a black or white variant besides the blue logo.
+  logo_dark: assets/img/institutions/saarland-white.svg
+  width: 780
+  height: 342
+  display_height: 62
+  source: https://www.uni-saarland.de/typo3conf/ext/uni_saarland/Resources/Public/Images/logo_uni_saarland.svg
+  source_dark_rule: https://www.uni-saarland.de/fileadmin/upload/verwaltung/cd/UdS-Style-Guide_2026.pdf
+
+- name: Koç University
+  url: https://www.ku.edu.tr/en/
+  logo: assets/img/institutions/koc.svg
+  # Official white wordmark from the ku.edu.tr footer, trimmed and resized to 720 px.
+  logo_dark: assets/img/institutions/koc-white.png
+  width: 225
+  height: 48
+  display_height: 42
+  # Original university artwork, archived from ku.edu.tr by Wikimedia Commons.
+  source: https://upload.wikimedia.org/wikipedia/commons/2/24/Ko%C3%A7_University_logo.svg
+  source_page: https://commons.wikimedia.org/wiki/File:Ko%C3%A7_University_logo.svg
+  source_dark: https://www.ku.edu.tr/wp-content/uploads/2023/09/logo-max.png
+
+- name: University of Oxford
+  url: https://www.ox.ac.uk/
+  # Oxford's own crest and wordmark paths from the ox.ac.uk header logo, set side by side without
+  # the blue box so the mark matches the others (Oxford blue in light mode, white in dark mode).
+  # Oxford's brand guidelines prefer the boxed logo; the boxed source is the URL below.
+  logo: assets/img/institutions/oxford-mark.svg
+  logo_dark: assets/img/institutions/oxford-mark-white.svg
+  width: 1044
+  height: 386
+  display_height: 50
+  source: https://www.ox.ac.uk/themes/custom/numiko/dist/oxford-logo-DzIWfeXH.svg

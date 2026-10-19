@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-Started as a Graduate Student Visitor at [VGG Oxford](https://www.robots.ox.ac.uk/~vgg/).
+Started as a graduate student visitor at [VGG Oxford](https://www.robots.ox.ac.uk/~vgg/).

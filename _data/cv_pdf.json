@@ -1,0 +1,258 @@
+{
+  "source": "assets/pdf/resume.pdf",
+  "sha256": "61a141e0b87388becea5347f90864b45569043310f09e1b3d4296bbd94c2272f",
+  "pages": 2,
+  "header": [
+    "Nazir Nayal",
+    "Campus E1 4, 66123 Saarbrücken, Saarland, Germany",
+    "(+49)152 10834366 ⋄ nnayal@mpi-inf.mpg.de ⋄ GitHub ⋄ LinkedIn ⋄ Personal Website"
+  ],
+  "sections": [
+    {
+      "id": "education",
+      "title": "Education",
+      "kind": "entries",
+      "items": [
+        {
+          "title": "Universität des Saarlandes",
+          "date": "Sept 2024 - Aug 2027",
+          "bullets": [
+            "Part of the CS@Max Planck Doctoral Program"
+          ],
+          "subtitle": "Doctor of Philosophy - PhD, Computer Science.",
+          "location": "Saarbrücken, Saarland, Germany"
+        },
+        {
+          "title": "Koç University",
+          "date": "Sept 2021 - Sept 2023",
+          "bullets": [
+            "Funded by KUIS AI Center and Newton Advanced Fellowship (Royal Society UK)"
+          ],
+          "subtitle": "Master of Science, Computer Science and Engineering.",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Koç University",
+          "date": "Sept 2017 - June 2021",
+          "bullets": [
+            "Full scholarship funded by Al Ghurair Foundation (AGFE)."
+          ],
+          "subtitle": "Bachelor of Science, Computer Engineering.",
+          "location": "Istanbul, Turkey"
+        }
+      ]
+    },
+    {
+      "id": "research-interests",
+      "title": "Research interests",
+      "kind": "list",
+      "items": [
+        "Generative Modeling, World Modeling, Uncertainty, Multi-Modality."
+      ]
+    },
+    {
+      "id": "publications",
+      "title": "Publications",
+      "kind": "list",
+      "items": [
+        "N. Nayal, C. Wewer. J. E. Lenssen ”MixFlow: Mixed Source Distributions Improve Rectified Flows” in ICLR 2026 2nd DeLTa Workshop",
+        "N. Nayal, Y. Shoeb, F. Güney ”A Likelihood Ratio-Based Approach to Segmenting Unknown Objects” in IJCV 2025",
+        "Y. Shoeb, N. Nayal, A. Nowzad, F. Güney, H. Gottschalk ”Segment-Level Road Obstacle Detection Using Visual Foundation Model Priors and Likelihood Ratios” in VISAPP 2025",
+        "N. Nayal, M. Yavuz, J. F. Henriques F. Güney ”RbA: Segmenting Unknown Regions Rejected by All” in ICCV 2023.",
+        "Y. Hassanzadeh-Nazarabadi, N. Nayal, S. Sameh Hamdan, Ö. Özkasap, and A. Küpçü, “A containerized proof-of-concept implementation of lightchain system,” in ICBC. IEEE, 2020.",
+        "Y. Hassanzadeh-Nazarabadi, N. Nayal, S. Sameh Hamdan, A. Utkan Şahin, Ö. Özkasap, and A. Küpçü, ”Demo: Skip Graph Middleware Implementation”, in SRDS 2020."
+      ]
+    },
+    {
+      "id": "experience",
+      "title": "Experience",
+      "kind": "entries",
+      "items": [
+        {
+          "title": "Max Planck Institute of Informatics (MPI-INF)",
+          "date": "Sept 2024 - Present",
+          "bullets": [
+            "Working with the Computer Vision and Machine Learning Group"
+          ],
+          "subtitle": "Doctoral Researcher",
+          "location": "Saarbrücken, Saarland, Germany"
+        },
+        {
+          "title": "Visual Geometry Group (VGG), University of Oxford",
+          "date": "Sept 2023 - Oct 2023",
+          "bullets": [
+            "Visited VGG as part of our project collaboration with João F. Henriques."
+          ],
+          "subtitle": "Graduate Short Term Student Visitor",
+          "location": "Oxford, United Kingdom"
+        },
+        {
+          "title": "Koç University & İş Bankası Artificial Intelligence Center (KUIS AI)",
+          "date": "Sept 2021 - Sept 2024",
+          "bullets": [
+            "Worked on detection of rare events and unknown objects in Autonomous Driving scenarios."
+          ],
+          "subtitle": "Research Fellow",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Unvest R&D Center",
+          "date": "April 2022 - Sept 2024",
+          "bullets": [
+            "Explored the potential of deploying uncertainty estimation models for autonomous driving."
+          ],
+          "subtitle": "Research Engineer",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Syrian Youth Empowerment (SYE)",
+          "date": "July 2021 - Present",
+          "bullets": [
+            "Mentoring and providing support to Syrian students applying for graduate degrees abroad."
+          ],
+          "subtitle": "Grad Student Mentor",
+          "location": "Remote"
+        },
+        {
+          "title": "Hospital on Mobile (now CareX.ai)",
+          "date": "Jan 2021 - June 2021",
+          "bullets": [
+            "Conducted research and developed AI models for vital signs prediction."
+          ],
+          "subtitle": "AI Engineer",
+          "location": "Remote"
+        },
+        {
+          "title": "Invent Analytics",
+          "date": "July 2020 - Sept 2020",
+          "bullets": [
+            "Implemented a machine learning forecasting model based on supermarket products sales data."
+          ],
+          "subtitle": "Software Engineering Intern",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Distributed Systems and Reliable Networks Laboratory (DISNET)",
+          "date": "Mar 2019 - Jan 2021",
+          "bullets": [
+            "Implemented Proof of Concept for LightChain, and an augmented version of Skip Graph Data Structure."
+          ],
+          "subtitle": "Research Intern",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Dapper Labs (Based in Vancouver, Canada)",
+          "date": "Aug 2019 – Dec 2019",
+          "bullets": [
+            "Contributed to the implementation of the first version of the networking layer of Flow Blockchain."
+          ],
+          "subtitle": "Software Engineering Intern",
+          "location": "Remote"
+        }
+      ]
+    },
+    {
+      "id": "achievements",
+      "title": "Achievements",
+      "kind": "entries",
+      "items": [
+        {
+          "title": "Al Ghurair Foundation for Education STEM Scholarship (AGFE)",
+          "date": "Sept 2017 - Sept 2021",
+          "bullets": [
+            "A merit-based award for highly achieving Arab students to pursue a degree in STEM."
+          ],
+          "subtitle": "Recipient",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Vehbi Koç Scholar Award",
+          "date": "2018 - 2019 - 2020 - 2021",
+          "bullets": [
+            "Received this award for 4 consecutive years for maintaining a semester GPA of 3.5+."
+          ],
+          "subtitle": "Award Recipient",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "IEEEXtreme 13.0 Programming Contest",
+          "date": "Oct 2019",
+          "bullets": [
+            "Ranked 67th globally and 2nd among teams participating from Turkey."
+          ],
+          "subtitle": "Contestant",
+          "location": "Online"
+        },
+        {
+          "title": "Turkish Programming Contest (TPC)",
+          "date": "Sept 2019",
+          "bullets": [
+            "Represented Koç University and ranked 12th among teams participating from all over Turkey."
+          ],
+          "subtitle": "Contestant",
+          "location": "Istanbul, Turkey"
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "title": "Skills",
+      "kind": "list",
+      "items": [
+        "Technical: C++, Python, PyTorch, Deep Learning, Agile Development, Algorithms & Data Structures, Competitive Programming, Data Analysis, Blockchain.",
+        "Languages: Arabic (native), English (fluent), French (intermediate), Turkish (intermediate)."
+      ]
+    },
+    {
+      "id": "projects",
+      "title": "Projects",
+      "kind": "paragraph",
+      "text": "For list of projects you may visit project page in my website."
+    },
+    {
+      "id": "extracurricular",
+      "title": "Extracurricular activities",
+      "kind": "entries",
+      "items": [
+        {
+          "title": "Koç University Programming Championship (KUPC)",
+          "date": "Jan 2020 - Sept 2020",
+          "bullets": [
+            "KUPC is an ACM-ICPC style programming competition for Koç University students.",
+            "Created and tested problems, and prepared competition system."
+          ],
+          "subtitle": "Problem Setter & Chief Judge",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Koç University ACM Student Chapter (KUACM)",
+          "date": "May 2019 - Aug 2020",
+          "bullets": [
+            "Managed and organized programs and activities carried out under that chapter’s supervision."
+          ],
+          "subtitle": "Vice President",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "Koç University Algorithms Program (KUAP)",
+          "date": "Jan 2019 - Sept 2020",
+          "bullets": [
+            "Created a curriculum that covers basics of problem solving using algorithms and data structures.",
+            "Led discussions and problem solving sessions demonstrating concepts and solutions to problems."
+          ],
+          "subtitle": "Founder & Coordinator & Instructor",
+          "location": "Istanbul, Turkey"
+        },
+        {
+          "title": "inzva Algorithmic Competition Winter Camp 2019",
+          "date": "Jan 2019",
+          "bullets": [
+            "Ranked 1st in final day contest after a week long intensive training on algorithms and data structures."
+          ],
+          "subtitle": "Participant & Contestant",
+          "location": "Istanbul, Turkey"
+        }
+      ]
+    }
+  ]
+}

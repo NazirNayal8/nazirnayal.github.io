@@ -1,0 +1,35 @@
+{% if site.data.affiliations %}
+  <section id="affiliations" class="home-section affiliations" aria-label="Institutional affiliations">
+    <ul class="affiliation-list">
+      {% for institution in site.data.affiliations %}
+        <li>
+          <a class="affiliation-link" href="{{ institution.url }}">
+            <span class="affiliation-logo" style="--logo-height: {{ institution.display_height | default: 56 }}px">
+              {% comment %} The theme toggle sets html[data-theme]; CSS shows the matching variant. {% endcomment %}
+              <img
+                class="{% if institution.logo_dark %}logo-light{% endif %}"
+                src="{{ institution.logo | relative_url }}"
+                alt="{{ institution.name | escape }}"
+                width="{{ institution.width }}"
+                height="{{ institution.height }}"
+                loading="lazy"
+                decoding="async"
+              >
+              {% if institution.logo_dark %}
+                <img
+                  class="logo-dark"
+                  src="{{ institution.logo_dark | relative_url }}"
+                  alt="{{ institution.name | escape }}"
+                  width="{{ institution.width }}"
+                  height="{{ institution.height }}"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {% endif %}
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}

@@ -22,6 +22,8 @@
 {% endif %}
 
 <!-- Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link defer rel="stylesheet" href="{{ '/assets/css/academicons.min.css' | relative_url | bust_file_cache }}">
 <link
   defer
@@ -63,10 +65,14 @@
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>{{ site.icon }}</text></svg>"
   >
 {% elsif site.icon != blank %}
-  <link rel="shortcut icon" href="{{ site.icon | prepend: '/assets/img/' | relative_url | bust_file_cache}}">
+  <link rel="icon" type="image/svg+xml" href="{{ site.icon | prepend: '/assets/img/' | relative_url | bust_file_cache}}">
 {% endif %}
 <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url | bust_css_cache }}">
 <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+<script defer src="{{ '/assets/js/editorial.js' | relative_url | bust_file_cache }}"></script>
+<script defer src="{{ '/assets/js/motifs.js' | relative_url | bust_file_cache }}"></script>
+{% if page.layout == 'about' %}<script defer src="{{ '/assets/js/home.js' | relative_url | bust_file_cache }}"></script>{% endif %}
+{% if page.interactive_pdf %}<script defer src="{{ '/assets/js/cv.js' | relative_url | bust_file_cache }}"></script>{% endif %}
 
 <!-- Dark Mode -->
 <script src="{{ '/assets/js/theme.js' | relative_url | bust_file_cache }}"></script>

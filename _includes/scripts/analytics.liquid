@@ -10,6 +10,21 @@
     gtag('config', '{{ site.google_analytics }}');
   </script>
 {% endif %}
+{% assign cloudflare_token = site.cloudflare_analytics | default: '' | strip %}
+{% if jekyll.environment == 'production' and site.enable_cloudflare_analytics and cloudflare_token.size > 0 %}
+  {% assign cloudflare_hostname = site.url | remove_first: 'https://' | remove_first: 'http://' | split: '/' | first | split: ':' | first | downcase %}
+  <!-- Cloudflare Web Analytics: exclude local and alternate-host previews. -->
+  <script id="cloudflare-analytics">
+    (() => {
+      if (window.location.hostname !== {{ cloudflare_hostname | jsonify }}) return;
+      const beacon = document.createElement('script');
+      beacon.type = 'module';
+      beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      beacon.setAttribute('data-cf-beacon', JSON.stringify({ token: {{ cloudflare_token | jsonify }} }));
+      document.body.appendChild(beacon);
+    })();
+  </script>
+{% endif %}
 {% if site.enable_cronitor_analytics %}
   <!-- Cronitor RUM -->
   <script async src="https://rum.cronitor.io/script.js"></script>

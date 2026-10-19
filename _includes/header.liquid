@@ -1,44 +1,25 @@
 <header>
   <!-- Nav Bar -->
-  <nav id="navbar" class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}" role="navigation">
+  <nav id="navbar" class="navbar navbar-light navbar-expand-lg {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}" aria-label="Main navigation">
     <div class="container">
-      {% if page.permalink != '/' %}
+      {% unless page.permalink == '/' and site.enable_navbar_social %}
         <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
-          {% if site.title == 'blank' %}
-            {% if site.first_name %}
-              <span class="font-weight-bold">
-                {{- site.first_name -}}
-              </span>
-            {% endif %}
-            {% if site.middle_name %}
-              {{- site.middle_name -}}
-            {% endif %}
-            {% if site.last_name %}
-              {{- site.last_name -}}
-            {% endif %}
-          {% else %}
-            {{- site.title -}}
-          {% endif %}
+          <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 17 10 7l4 10 6-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="17" r="2" fill="currentColor"/><circle cx="20" cy="7" r="2" fill="currentColor"/></svg>
+          {% comment %} One span keeps the name a single flex item, so the brand gap does not split it. {% endcomment %}
+          <span class="brand-name">
+            {%- if site.title == 'blank' -%}
+              {{- site.first_name -}}
+              {%- if site.middle_name and site.middle_name != '' %} {{ site.middle_name }}{% endif %}
+              {{ site.last_name -}}
+            {%- else -%}
+              {{- site.title -}}
+            {%- endif -%}
+          </span>
         </a>
-      {% elsif site.enable_navbar_social %}
+      {% else %}
         <!-- Social Icons -->
         <div class="navbar-brand social">{% include social.liquid %}</div>
-      {% endif %}
-      <!-- Navbar Toggle -->
-      <button
-        class="navbar-toggler collapsed ml-auto"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar top-bar"></span>
-        <span class="icon-bar middle-bar"></span>
-        <span class="icon-bar bottom-bar"></span>
-      </button>
+      {% endunless %}
 
       <div class="collapse navbar-collapse text-right" id="navbarNav">
         <ul class="navbar-nav ml-auto flex-nowrap">
@@ -108,29 +89,44 @@
               {% endif %}
             {% endif %}
           {% endfor %}
+        </ul>
+      </div>
+      <div class="nav-actions">
           {% if site.search_enabled %}
             <!-- Search -->
-            <li class="nav-item">
-              <button id="search-toggle" title="Search" onclick="openSearchModal()">
-                <span class="nav-link">ctrl k <i class="ti ti-search"></i></span>
+              <button id="search-toggle" title="Search" aria-label="Search" onclick="openSearchModal()">
+                <span class="search-shortcut">ctrl k</span><i class="ti ti-search" aria-hidden="true"></i>
               </button>
-            </li>
           {% endif %}
           {% if site.enable_darkmode %}
             <!-- Toogle theme mode -->
-            <li class="toggle-container">
-              <button id="light-toggle" title="Change theme">
-                <i class="ti ti-sun-moon" id="light-toggle-system"></i>
-                <i class="ti ti-moon-filled" id="light-toggle-dark"></i>
-                <i class="ti ti-sun-filled" id="light-toggle-light"></i>
+              <button id="light-toggle" title="Change theme" aria-label="Change theme">
+                <i class="ti ti-sun-moon" id="light-toggle-system" aria-hidden="true"></i>
+                <i class="ti ti-moon-filled" id="light-toggle-dark" aria-hidden="true"></i>
+                <i class="ti ti-sun-filled" id="light-toggle-light" aria-hidden="true"></i>
               </button>
-            </li>
           {% endif %}
-        </ul>
+        <button
+          class="navbar-toggler collapsed"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar top-bar"></span>
+          <span class="icon-bar middle-bar"></span>
+          <span class="icon-bar bottom-bar"></span>
+        </button>
       </div>
     </div>
   </nav>
-  {% if site.enable_progressbar %}
+  {% if page.collection == 'posts' %}
+    <!-- Reading progress as denoising, drawn by motifs.js -->
+    <div class="denoise-progress" data-denoise-progress aria-hidden="true"><canvas></canvas></div>
+  {% elsif site.enable_progressbar %}
     <!-- Scrolling Progress Bar -->
     <progress id="progress" value="0">
       <div class="progress-container">

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Preview locally without changing the project's Gemfile or lockfile.
+set -euo pipefail
+
+project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+preview_dir="${PREVIEW_CACHE_DIR:-/tmp/nazir-site-preview}"
+preview_port="${PORT:-4000}"
+mkdir -p "$preview_dir"
+
+ruby - "$project_dir" "$preview_dir" <<'RUBY'
+require 'fileutils'
+project_dir, preview_dir = ARGV
+gemfile = File.read(File.join(project_dir, 'Gemfile'))
+# citeproc-ruby uses observer, which moved out of Ruby's default gems in 3.4.
+gemfile += "\ngem 'observer'\n" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4')
+target = File.join(preview_dir, 'Gemfile')
+if !File.exist?(target) || File.read(target) != gemfile
+  File.write(target, gemfile)
+  FileUtils.cp(File.join(project_dir, 'Gemfile.lock'), File.join(preview_dir, 'Gemfile.lock'))
+end
+RUBY
+
+export BUNDLE_GEMFILE="$preview_dir/Gemfile"
+export BUNDLE_PATH="$preview_dir/gems"
+export BUNDLE_APP_CONFIG="$preview_dir/bundle"
+export BUNDLE_USER_HOME="$preview_dir/bundle-user"
+export JUPYTER_CONFIG_DIR="$preview_dir/jupyter-config"
+export JUPYTER_DATA_DIR="$preview_dir/jupyter-data"
+export IPYTHONDIR="$preview_dir/ipython"
+bundle check > /dev/null 2>&1 || bundle install --jobs 4 --retry 2
+
+if ! command -v jupyter > /dev/null 2>&1; then
+  if [ ! -x "$preview_dir/python/bin/jupyter" ]; then
+    python3 -m venv "$preview_dir/python"
+    "$preview_dir/python/bin/pip" install --cache-dir "$preview_dir/pip-cache" nbconvert
+  fi
+  export PATH="$preview_dir/python/bin:$PATH"
+fi
+
+# Original images work locally even when ImageMagick is not installed.
+cat > "$preview_dir/local.yml" <<YAML
+url: "http://127.0.0.1:$preview_port"
+enable_cloudflare_analytics: false
+imagemagick:
+  enabled: false
+YAML
+
+exec bundle exec jekyll serve \
+  --source "$project_dir" \
+  --destination "$preview_dir/site" \
+  --config "$project_dir/_config.yml,$preview_dir/local.yml" \
+  --host 127.0.0.1 --port "$preview_port" --disable-disk-cache

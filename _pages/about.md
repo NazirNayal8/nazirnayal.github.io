@@ -1,8 +1,9 @@
 ---
 layout: about
-title: about
+title: About
 permalink: /
-subtitle: Doctoral Researcher @ <a href='https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning'>Max Planck Institute for Informatics</a>
+statement: I work on generative modeling and world models, with a focus on diffusion and flow-based models that learn how the world looks and predict how it changes.
+subtitle: Doctoral researcher @ <a href='https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning'>Max Planck Institute for Informatics</a>
 
 profile:
   align: right
