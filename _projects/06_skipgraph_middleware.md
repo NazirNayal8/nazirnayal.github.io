@@ -2,7 +2,7 @@
 layout: page
 title: "SkipGraph middleware"
 description: "A distributed SkipGraph implementation with node insertion and identifier-based search over Java RMI."
-img: assets/img/publication_preview/skipgraph.png
+img: assets/img/publication_preview/skipgraph.webp
 importance: 3
 category: research
 related_publications: false

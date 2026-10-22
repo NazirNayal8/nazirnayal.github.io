@@ -1,7 +1,30 @@
 {% if site.search_enabled %}
-  <script type="module" src="{{ '/assets/js/search/ninja-keys.min.js' | relative_url | bust_file_cache }}"></script>
   <ninja-keys hideBreadcrumbs noAutoLoadMdIcons placeholder="Type to start searching"></ninja-keys>
   <script>
+    // The search box (ninja-keys and its ~30 lit modules) loads once the page has loaded, or as soon as
+    // it is asked for, so it does not compete with the page itself.
+    const loadSearch = () => {
+      if (!window.searchLoading) {
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = "{{ '/assets/js/search/ninja-keys.min.js' | relative_url | bust_file_cache }}";
+        document.head.appendChild(script);
+        window.searchLoading = customElements.whenDefined('ninja-keys');
+      }
+      return window.searchLoading;
+    };
+    const whenIdle = window.requestIdleCallback ? (f) => window.requestIdleCallback(f, { timeout: 3000 }) : (f) => window.setTimeout(f, 1500);
+    if (document.readyState === 'complete') whenIdle(loadSearch);
+    else window.addEventListener('load', () => whenIdle(loadSearch), { once: true });
+    document.addEventListener('keydown', (event) => {
+      // Before it has loaded, the shortcut loads it and opens it (afterwards ninja-keys handles it).
+      if (customElements.get('ninja-keys') || (event.key || '').toLowerCase() !== 'k' || !(event.metaKey || event.ctrlKey)) return;
+      event.preventDefault();
+      loadSearch().then(() => openSearchModal());
+    });
+    const searchToggle = document.getElementById('search-toggle');
+    if (searchToggle) searchToggle.addEventListener('pointerenter', loadSearch, { once: true });
+
     let searchTheme = determineComputedTheme();
     const ninjaKeys = document.querySelector('ninja-keys');
 
@@ -17,7 +40,7 @@
       if ($navbarNav.hasClass('show')) {
         $navbarNav.collapse('hide');
       }
-      ninjaKeys.open();
+      loadSearch().then(() => ninjaKeys.open());
     };
   </script>
   <script>

@@ -2,7 +2,7 @@
 layout: page
 title: "MixFlow: Mixed Source Distributions Improve Rectified Flows"
 description: A training strategy that mixes conditional and unconditional source distributions to improve rectified-flow sampling.
-img: assets/img/publication_preview/mixflow_main_figure.png
+img: assets/img/publication_preview/mixflow_main_figure.webp
 importance: 0
 category: research
 github: https://github.com/NazirNayal8/MixFlow

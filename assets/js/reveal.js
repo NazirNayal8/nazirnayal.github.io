@@ -355,9 +355,18 @@
       revealObserver.observe(unit);
     });
   };
-  // Measure glyphs in the final web font, but never wait long for it.
-  const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  Promise.race([fontsReady, new Promise((resolve) => window.setTimeout(resolve, 1200))]).then(start, start);
+  // Measure glyphs in the page's text fonts (not the icon or background fonts, which can take far
+  // longer), but never hold the text back for long: a font that arrives later re-places the overlays.
+  const textFonts = () => {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    const sheet = document.querySelector('link[href*="fonts.googleapis.com/css"]');
+    const sheetIn = !sheet || sheet.sheet ? Promise.resolve() : new Promise((resolve) => {
+      sheet.addEventListener("load", resolve, { once: true });
+      sheet.addEventListener("error", resolve, { once: true });
+    });
+    return sheetIn.then(() => Promise.all(['1em "Geist"', '1em "Geist Mono"'].map((font) => document.fonts.load(font))));
+  };
+  Promise.race([textFonts(), new Promise((resolve) => window.setTimeout(resolve, 600))]).then(start, start);
 
   // Content above can move (an abstract opens, the window resizes): keep waiting overlays aligned.
   let queued = false;
@@ -372,4 +381,5 @@
   };
   window.addEventListener("resize", queue);
   if ("ResizeObserver" in window) new ResizeObserver(queue).observe(document.body);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", queue);
 })();

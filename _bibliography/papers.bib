@@ -15,7 +15,7 @@
   arxiv       = {2604.09181},
   openreview  = {https://openreview.net/forum?id=uWktyU3OIJ},
   code        = {https://github.com/NazirNayal8/MixFlow},
-  preview     = {mixflow_main_figure.png},
+  preview     = {mixflow_main_figure.webp},
   abstract    = {Diffusion models and their variations, such as rectified flows, generate diverse and high-quality images, but they are still hindered by slow iterative sampling caused by the highly curved generative paths they learn. An important cause of high curvature, as shown by previous work, is independence between the source distribution (standard Gaussian) and the data distribution. In this work, we tackle this limitation by two complementary contributions. First, we attempt to break away from the standard Gaussian assumption by introducing κ-FC, a general formulation that conditions the source distribution on an arbitrary signal κ that aligns it better with the data distribution. Then, we present MixFlow, a simple but effective training strategy that reduces the generative path curvatures and considerably improves sampling efficiency. MixFlow trains a flow model on linear mixtures of a fixed unconditional distribution and a κ-FC-based distribution. This simple mixture improves the alignment between the source and data, provides better generation quality with less required sampling steps, and accelerates the training convergence considerably. On average, our training procedure improves the generation quality by 12% in FID compared to standard rectified flow and 7% compared to previous baselines under a fixed sampling budget.}
 }
 
@@ -53,7 +53,7 @@
   bibtex_show = {true},
   arxiv       = {2409.06424},
   code        = {https://github.com/NazirNayal8/UEM-likelihood-ratio},
-  preview     = {UEM_preview.png},
+  preview     = {UEM_preview.webp},
   abstract    = {Addressing the Out-of-Distribution (OoD) segmentation task is a prerequisite for perception systems operating in an open-world environment. Large foundational models are frequently used in downstream tasks, however, their potential for OoD remains mostly unexplored. We seek to leverage a large foundational model to achieve robust representation. Outlier supervision is a widely used strategy for improving OoD detection of the existing segmentation networks. However, current approaches for outlier supervision involve retraining parts of the original network, which is typically disruptive to the model’s learned feature representation. Furthermore, retraining becomes infeasible in the case of large foundational models. Our goal is to retrain for outlier segmentation without compromising the strong representation space of the foundational model. To this end, we propose an adaptive, lightweight unknown estimation module (UEM) for outlier supervision that significantly enhances the OoD segmentation performance without affecting the learned feature representation of the original network. UEM learns a distribution for outliers and a generic distribution for known classes. Using the learned distributions, we propose a likelihood-ratio-based outlier scoring function that fuses the confidence of UEM with that of the pixel-wise segmentation inlier network to detect unknown objects. We also propose an objective to optimize this score directly. Our approach achieves a new state-of-the-art across multiple datasets, outperforming the previous best method by 5.74% average precision points while having a lower false-positive rate. Importantly, strong inlier performance remains unaffected.}
 }
 
@@ -70,7 +70,7 @@
   selected    = {true},
   bibtex_show = {true},
   arxiv       = {2412.05707},
-  preview     = {segment-level-overview.png},
+  preview     = {segment-level-overview.webp},
   abstract    = {Detecting road obstacles is essential for autonomous vehicles to navigate dynamic and complex traffic environments safely. Current road obstacle detection methods typically assign a score to each pixel and apply a threshold to generate final predictions. However, selecting an appropriate threshold is challenging, and the per-pixel classification approach often leads to fragmented predictions with numerous false positives. In this work, we propose a novel method that leverages segment-level features from visual foundation models and likelihood ratios to predict road obstacles directly. By focusing on segments rather than individual pixels, our approach enhances detection accuracy, reduces false positives, and offers increased robustness to scene variability. We benchmark our approach against existing methods on the RoadObstacle and LostAndFound datasets, achieving state-of-the-art performance without needing a predefined threshold.}
 }
 
@@ -86,7 +86,7 @@
   selected    = {false},
   bibtex_show = {true},
   arxiv       = {2007.13203},
-  preview     = {lightchain.png}
+  preview     = {lightchain.webp}
 }
 
 @inproceedings{9252072,
@@ -101,5 +101,5 @@
   selected    = {false},
   bibtex_show = {true},
   pdf         = {skipgraph.pdf},
-  preview     = {skipgraph.png}
+  preview     = {skipgraph.webp}
 }

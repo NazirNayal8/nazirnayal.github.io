@@ -233,7 +233,8 @@ body.editorial-site {
     border: 1px solid transparent;
     cursor: pointer;
     &:hover { color: var(--global-text-color); background: var(--editorial-surface); }
-    i { padding: 0; }
+    i { padding: 0; line-height: 0; }
+    .icon { display: block; }
   }
   #search-toggle { gap: 9px; }
   .search-shortcut { font: 0.62rem var(--editorial-mono); color: var(--global-text-color-light); white-space: nowrap; }
@@ -956,3 +957,6 @@ html.transition, html.transition *, html.transition *::before, html.transition *
     color: var(--global-theme-color) !important;
   }
 }
+
+// Inline icons (_includes/icon.liquid), sized like the text around them.
+.icon { display: inline-block; width: 1em; height: 1em; flex-shrink: 0; vertical-align: -0.125em; }

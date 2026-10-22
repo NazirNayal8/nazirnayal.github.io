@@ -2,7 +2,7 @@
 layout: page
 title: "Likelihood-ratio estimation for unknown objects"
 description: "An unknown estimation module for detecting out-of-distribution regions using foundation models and likelihood ratios."
-img: assets/img/publication_preview/UEM_preview.png
+img: assets/img/publication_preview/UEM_preview.webp
 importance: 2
 category: research
 related_publications: false
