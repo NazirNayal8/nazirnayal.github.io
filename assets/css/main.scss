@@ -21,6 +21,7 @@ $max-content-width: {{ site.max_width }};
   "font-awesome/regular"
 ;
 
+@import "geist";
 @import "editorial";
 @import "cv_pdf";
 @import "blog";

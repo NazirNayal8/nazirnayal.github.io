@@ -22,15 +22,10 @@
 {% endif %}
 
 <!-- Fonts & Icons -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{% comment %} Geist is served from this site (_sass/_geist.scss); the Latin files, on every page, load from the start. {% endcomment %}
+<link rel="preload" href="{{ '/assets/fonts/geist/geist-latin.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ '/assets/fonts/geist/geist-mono-latin.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 <link defer rel="stylesheet" href="{{ '/assets/css/academicons.min.css' | relative_url | bust_file_cache }}">
-<link
-  defer
-  rel="stylesheet"
-  type="text/css"
-  href="{{ site.third_party_libraries.google_fonts.url.fonts }}"
->
 
 <!-- Code Syntax Highlighting -->
 <link

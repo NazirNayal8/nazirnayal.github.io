@@ -57,8 +57,8 @@
     "d-article > :is(p, h1, h2, h3, h4, ul, ol, blockquote)",
   ].join(", ");
   const STEPS = 14;
-  const STEP_MS = 70;
-  const STAGGER_MS = 90;
+  const STEP_MS = 44;
+  const STAGGER_MS = 56;
   const MODE = document.documentElement.dataset.textNoise === "mask" ? "mask" : "uniform";
   const LOWER = "abcdefghijklmnopqrstuvwxyz";
   const UPPER = LOWER.toUpperCase();
@@ -328,7 +328,7 @@
     const first = all.filter(inFirstScreen).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
     first.forEach((unit) => prepare(unit));
     boot();
-    first.forEach((unit, index) => run(unit, Math.min(index * 45, 700)));
+    first.forEach((unit, index) => run(unit, Math.min(index * 28, 440)));
 
     // Below the first screen, scroll units are noised just before they arrive and revealed on entry.
     const later = Array.from(document.querySelectorAll(UNITS)).filter((unit) => !first.includes(unit) && unit.getBoundingClientRect().top >= height);
@@ -359,12 +359,7 @@
   // longer), but never hold the text back for long: a font that arrives later re-places the overlays.
   const textFonts = () => {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
-    const sheet = document.querySelector('link[href*="fonts.googleapis.com/css"]');
-    const sheetIn = !sheet || sheet.sheet ? Promise.resolve() : new Promise((resolve) => {
-      sheet.addEventListener("load", resolve, { once: true });
-      sheet.addEventListener("error", resolve, { once: true });
-    });
-    return sheetIn.then(() => Promise.all(['1em "Geist"', '1em "Geist Mono"'].map((font) => document.fonts.load(font))));
+    return Promise.all(['1em "Geist"', '1em "Geist Mono"'].map((font) => document.fonts.load(font)));
   };
   Promise.race([textFonts(), new Promise((resolve) => window.setTimeout(resolve, 600))]).then(start, start);
 

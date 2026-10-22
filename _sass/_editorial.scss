@@ -958,5 +958,10 @@ html.transition, html.transition *, html.transition *::before, html.transition *
   }
 }
 
-// Inline icons (_includes/icon.liquid), sized like the text around them.
-.icon { display: inline-block; width: 1em; height: 1em; flex-shrink: 0; vertical-align: -0.125em; }
+// Inline icons (_includes/icon.liquid), sized like the text around them: 1em tall, as wide as the
+// icon's proportions (as Font Awesome's own inline SVGs are).
+.icon { display: inline-block; width: auto; height: 1em; flex-shrink: 0; overflow: visible; vertical-align: -0.125em; }
+.icon-sm { height: 0.875em; vertical-align: -0.1em; }
+// Contact links: icons in the text colour and the accent on hover, as the icon fonts drew them.
+.editorial-site .contact-icons a { color: var(--global-text-color); }
+.editorial-site .contact-icons a:hover { color: var(--global-theme-color); }

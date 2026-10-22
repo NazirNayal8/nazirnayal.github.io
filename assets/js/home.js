@@ -60,7 +60,7 @@
       for (let i = 0; i < bank.length; i += 1) bank[i] = gauss(random);
 
       const STEPS = 28;
-      const STEP_MS = 62;
+      const STEP_MS = 39;
       const estimate = (resolution) => {
         // Photo at reduced resolution, smoothly upscaled: the sampler's blurry guess of x0.
         const w = Math.max(2, Math.round(width * resolution));
