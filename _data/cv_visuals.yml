@@ -1,0 +1,12 @@
+# Visuals for CV cards. An entry whose title contains `match` shows the logo of the named
+# institution from _data/affiliations.yml (light and dark variants, official sources noted there).
+# Entries without a match get a generated emblem (initials over a pattern seeded by the name).
+# Only names written in the CV are matched; affiliations are not inferred.
+- match: "Universität des Saarlandes"
+  institution: Saarland University
+- match: "Koç University"
+  institution: Koç University
+- match: "Max Planck Institute"
+  institution: Max Planck Institute for Informatics
+- match: "University of Oxford"
+  institution: University of Oxford

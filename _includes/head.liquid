@@ -71,12 +71,18 @@
 <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
 <script defer src="{{ '/assets/js/editorial.js' | relative_url | bust_file_cache }}"></script>
 <script defer src="{{ '/assets/js/motifs.js' | relative_url | bust_file_cache }}"></script>
-<script defer src="{{ '/assets/js/reveal.js' | relative_url | bust_file_cache }}"></script>
-{% if page.layout == 'about' %}<script defer src="{{ '/assets/js/home.js' | relative_url | bust_file_cache }}"></script>{% endif %}
+{% comment %} cv.js runs before reveal.js, so the cards it builds are part of the page's reveals. {% endcomment %}
 {% if page.interactive_pdf %}<script defer src="{{ '/assets/js/cv.js' | relative_url | bust_file_cache }}"></script>{% endif %}
+<script defer src="{{ '/assets/js/reveal.js' | relative_url | bust_file_cache }}"></script>
+<script defer src="{{ '/assets/js/ambient.js' | relative_url | bust_file_cache }}"></script>
+{% if page.layout == 'about' %}<script defer src="{{ '/assets/js/home.js' | relative_url | bust_file_cache }}"></script>{% endif %}
 
 <!-- Dark Mode -->
 <script src="{{ '/assets/js/theme.js' | relative_url | bust_file_cache }}"></script>
+<script>
+  // Text is denoised on load (assets/js/reveal.js); hide it until then so it never flashes.
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('dd-boot');
+</script>
 {% if site.enable_darkmode %}
   <link
     defer

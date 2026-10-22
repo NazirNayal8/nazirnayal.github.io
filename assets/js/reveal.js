@@ -10,11 +10,18 @@
  * links and screen readers keep working on the real text throughout.
  *
  * Images clear from blur and colour noise in the same number of steps, clipped to their own box.
- * Without JavaScript, or with reduced motion, content is shown as is. */
+ *
+ * Everything in the first screen is denoised when the page opens (headers, text, cards); content
+ * further down is denoised as it scrolls in. Without JavaScript, or with reduced motion, content is
+ * shown as is. Other scripts can denoise an element on demand with window.Denoise.reveal(element). */
 (() => {
   "use strict";
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+  const boot = () => document.documentElement.classList.remove("dd-boot");
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+    boot();
+    return;
+  }
 
   // Each unit reveals on its own, so items further down a long section are not done before they are seen.
   const UNITS = [
@@ -27,8 +34,27 @@
     ".projects h2.category",
     ".project-step",
     ".post-list > li",
-    ".cv-entry",
-    ".cv-item-list > li",
+    ".cv-group-title",
+    ".cv-card",
+    ".cv-chips",
+    ".cv-pubs > li",
+    ".cv-group > p",
+  ].join(", ");
+  // Denoised only when the page opens, if they are in the first screen: page headers and the start
+  // of articles (long reading is not interrupted by reveals further down).
+  const LOAD_UNITS = [
+    ".about-heading > *",
+    ".about-header .profile-email",
+    ".post-header-copy > *",
+    ".post-header > .post-title",
+    ".post-header > .post-description",
+    ".post-header > .post-meta",
+    ".post-header > .post-tags",
+    ".blog-hero-copy > *",
+    "d-title > *",
+    ".post > article > :is(p, h2, h3, h4, ul, ol, blockquote)",
+    "#markdown-content > :is(p, h1, h2, h3, h4, ul, ol, blockquote)",
+    "d-article > :is(p, h1, h2, h3, h4, ul, ol, blockquote)",
   ].join(", ");
   const STEPS = 14;
   const STEP_MS = 70;
@@ -38,7 +64,7 @@
   const UPPER = LOWER.toUpperCase();
   const DIGITS = "0123456789";
   const MASK_TOKEN = "_";
-  const SKIP = "script, style, noscript, textarea, code, pre, svg, i, .hidden, [aria-hidden='true'], mjx-container";
+  const SKIP = "script, style, noscript, textarea, code, pre, svg, i, .hidden, .sr-only, [hidden], [aria-hidden='true'], mjx-container";
   const LETTER = /\p{L}/u;
   const NUMBER = /\p{N}/u;
   const SPACE = /\s/;
@@ -154,24 +180,29 @@
 
   // Position every glyph on its character's measured box, relative to the host.
   const range = document.createRange();
+  // Screen measurements are divided by the host's scale (an ancestor may be scaled), since the
+  // overlay lives inside the host and is scaled with it.
+  const scaleOf = (host, origin) => (host.offsetWidth ? origin.width / host.offsetWidth : 1) || 1;
   const placeText = (host, glyphs) => {
     const origin = host.getBoundingClientRect();
-    const dx = origin.left + host.clientLeft;
-    const dy = origin.top + host.clientTop;
+    const k = scaleOf(host, origin);
+    const dx = origin.left + host.clientLeft * k;
+    const dy = origin.top + host.clientTop * k;
     glyphs.forEach((g) => {
       range.setStart(g.node, g.start);
       range.setEnd(g.node, g.end);
       const box = range.getBoundingClientRect();
       const s = g.glyph.style;
-      s.left = `${box.left - dx}px`;
-      s.top = `${box.top - dy}px`;
-      s.width = `${box.width}px`;
-      s.height = `${box.height}px`;
+      s.left = `${(box.left - dx) / k}px`;
+      s.top = `${(box.top - dy) / k}px`;
+      s.width = `${box.width / k}px`;
+      s.height = `${box.height / k}px`;
     });
   };
 
   const prepareImages = (unit, host) => {
     const media = Array.from(unit.querySelectorAll("img, video")).filter((el) => {
+      if (el.closest("[data-denoise-photo]")) return false;
       const box = el.getBoundingClientRect();
       return box.width >= 24 && box.height >= 24;
     });
@@ -190,13 +221,14 @@
   };
   const placeImages = (host, images) => {
     const origin = host.getBoundingClientRect();
+    const k = scaleOf(host, origin);
     images.forEach(({ el, overlay }) => {
       const box = el.getBoundingClientRect();
       Object.assign(overlay.style, {
-        left: `${box.left - origin.left - host.clientLeft}px`,
-        top: `${box.top - origin.top - host.clientTop}px`,
-        width: `${box.width}px`,
-        height: `${box.height}px`,
+        left: `${(box.left - origin.left) / k - host.clientLeft}px`,
+        top: `${(box.top - origin.top) / k - host.clientTop}px`,
+        width: `${box.width / k}px`,
+        height: `${box.height / k}px`,
       });
     });
   };
@@ -207,6 +239,13 @@
       overlay.style.backgroundPosition = `${Math.floor(Math.random() * 96)}px ${Math.floor(Math.random() * 96)}px`;
     });
   };
+
+  // Styles for glyphs inside each overlay's shadow root (document styles do not reach it).
+  const GLYPH_STYLE = document.createElement("style");
+  GLYPH_STYLE.textContent = [
+    ".dd-g{position:absolute;display:block;margin:0;padding:0;line-height:normal;letter-spacing:0;white-space:pre;-webkit-text-fill-color:currentColor;}",
+    ".dd-g.is-noise{text-align:center;color:var(--global-theme-color)!important;}",
+  ].join("");
 
   const prepared = new Map();
   const place = (state) => {
@@ -219,7 +258,10 @@
     const layer = document.createElement("span");
     layer.className = "dd-layer";
     layer.setAttribute("aria-hidden", "true");
-    const glyphs = prepareText(unit, layer);
+    // Glyphs live in a shadow root, so the page's text (textContent, search) never includes the noise.
+    const shadow = layer.attachShadow ? layer.attachShadow({ mode: "open" }) : layer;
+    if (shadow !== layer) shadow.appendChild(GLYPH_STYLE.cloneNode(true));
+    const glyphs = prepareText(unit, shadow);
     host.classList.add("dd-host");
     host.appendChild(layer);
     unit.classList.add("dd-unit");
@@ -268,30 +310,54 @@
     }, delay);
   };
 
-  // Only units below the first screen are revealed; they are noised just before they arrive.
-  const units = Array.from(document.querySelectorAll(UNITS)).filter((unit) => unit.getBoundingClientRect().top >= window.innerHeight);
-  if (!units.length) return;
-  const nearObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      prepare(entry.target);
-      nearObserver.unobserve(entry.target);
+  // On demand, for content that appears later (for example an opened CV card).
+  window.Denoise = {
+    reveal(element, delay) {
+      if (element && !prepared.has(element)) run(element, delay || 0);
+    },
+  };
+
+  const start = () => {
+    const height = window.innerHeight;
+    const inFirstScreen = (unit) => {
+      const box = unit.getBoundingClientRect();
+      return box.top < height && box.bottom > 0 && unit.getClientRects().length > 0;
+    };
+    const all = Array.from(document.querySelectorAll(`${UNITS}, ${LOAD_UNITS}`));
+    // The first screen is noised in one go, then the page's text is shown (as noise) and resolves top down.
+    const first = all.filter(inFirstScreen).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+    first.forEach((unit) => prepare(unit));
+    boot();
+    first.forEach((unit, index) => run(unit, Math.min(index * 45, 700)));
+
+    // Below the first screen, scroll units are noised just before they arrive and revealed on entry.
+    const later = Array.from(document.querySelectorAll(UNITS)).filter((unit) => !first.includes(unit) && unit.getBoundingClientRect().top >= height);
+    if (!later.length) return;
+    const nearObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        prepare(entry.target);
+        nearObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px 700px 0px" });
+    const revealObserver = new IntersectionObserver((entries) => {
+      let index = 0;
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        revealObserver.unobserve(entry.target);
+        nearObserver.unobserve(entry.target);
+        run(entry.target, index * STAGGER_MS);
+        index += 1;
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+    later.forEach((unit) => {
+      nearObserver.observe(unit);
+      revealObserver.observe(unit);
     });
-  }, { rootMargin: "0px 0px 700px 0px" });
-  const revealObserver = new IntersectionObserver((entries) => {
-    let index = 0;
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      revealObserver.unobserve(entry.target);
-      nearObserver.unobserve(entry.target);
-      run(entry.target, index * STAGGER_MS);
-      index += 1;
-    });
-  }, { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
-  units.forEach((unit) => {
-    nearObserver.observe(unit);
-    revealObserver.observe(unit);
-  });
+  };
+  // Measure glyphs in the final web font, but never wait long for it.
+  const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  Promise.race([fontsReady, new Promise((resolve) => window.setTimeout(resolve, 1200))]).then(start, start);
 
   // Content above can move (an abstract opens, the window resizes): keep waiting overlays aligned.
   let queued = false;

@@ -604,12 +604,6 @@
   const topics = Array.from(panel.querySelectorAll("[data-showcase-topic]"));
   const caption = panel.querySelector("[data-showcase-caption]");
   const view = { yaw: -0.32, pitch: 0.3, dist: 4.4, f: 500, cx: 0, cy: 0, cyaw: 1, syaw: 0, cpitch: 1, spitch: 0, noise: 0 };
-  // The background layer: the same scene, larger and faint, fixed behind the page below the band.
-  const backdrop = document.querySelector("[data-showcase-backdrop]");
-  const bgCanvas = backdrop ? backdrop.querySelector("canvas") : null;
-  const bgCtx = bgCanvas ? bgCanvas.getContext("2d") : null;
-  const bgView = { yaw: -0.32, pitch: 0.3, dist: 4.4, f: 500, cx: 0, cy: 0, cyaw: 1, syaw: 0, cpitch: 1, spitch: 0, noise: 0 };
-  const narrow = window.matchMedia("(max-width: 767.98px)");
   const starts = { flow: 0, forecast: 0, plan: 0, latent: 0 };
   let width = 0;
   let height = 0;
@@ -623,9 +617,6 @@
   let frame = null;
   let paused = false;
   let visible = true;
-  let bgWidth = 0;
-  let bgHeight = 0;
-  let bgLevel = 0;
 
   // Each scene runs on its own clock from when it came on, so every story starts at its beginning.
   const local = (name) => (reduced.matches ? STILLS[name] : time - starts[name]);
@@ -644,27 +635,6 @@
     view.cx = width / 2;
     view.cy = height * 0.68;
     return true;
-  };
-
-  const bgLayout = () => {
-    if (!bgCtx) return;
-    const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-    bgWidth = window.innerWidth;
-    bgHeight = window.innerHeight;
-    bgCanvas.width = Math.round(bgWidth * ratio);
-    bgCanvas.height = Math.round(bgHeight * ratio);
-    bgCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    bgView.f = narrow.matches ? bgWidth * 1.05 : Math.min(bgWidth * 0.62, bgHeight * 1.2);
-    bgView.cx = bgWidth * (narrow.matches ? 0.5 : 0.58);
-    bgView.cy = bgHeight * 0.56;
-  };
-
-  // The background fades in as the band leaves the top of the viewport, and stays faint.
-  const bgTarget = () => {
-    if (!bgCtx) return 0;
-    const box = space.getBoundingClientRect();
-    const away = clamp(1 - box.bottom / (window.innerHeight * 0.35), 0, 1);
-    return smooth(away) * (narrow.matches ? 0.1 : 0.14);
   };
 
   const announce = (index) => {
@@ -709,7 +679,6 @@
 
   const paint = () => {
     if (width && visible) draw(own, view, width, height, 1);
-    if (bgCtx && bgWidth) draw(bgCtx, bgView, bgWidth, bgHeight, bgLevel);
   };
 
   const advance = (dt) => {
@@ -732,24 +701,18 @@
     if (last === null || dt >= 1 / 40) {
       last = now;
       advance(Math.min(dt, 0.1));
-      bgLevel = lerp(bgLevel, bgTarget(), 1 - Math.exp(-Math.min(dt, 0.1) * 6));
       paint();
     }
     frame = window.requestAnimationFrame(tick);
   };
-  // Animate while either the band or the background is on screen.
-  const shouldRun = () => !reduced.matches && !paused && !document.hidden && (visible || bgTarget() > 0.004);
+  const shouldRun = () => !reduced.matches && !paused && !document.hidden && visible;
   const sync = () => {
     if (frame !== null) window.cancelAnimationFrame(frame);
     frame = null;
     last = null;
     if (toggle) toggle.hidden = reduced.matches;
-    if (shouldRun()) {
-      frame = window.requestAnimationFrame(tick);
-    } else {
-      bgLevel = bgTarget();
-      paint();
-    }
+    if (shouldRun()) frame = window.requestAnimationFrame(tick);
+    else paint();
   };
 
   if (toggle) {
@@ -795,18 +758,6 @@
       if (layout()) paint();
     });
   }
-  window.addEventListener("resize", () => {
-    bgLayout();
-    if (frame === null) paint();
-  });
-  window.addEventListener("scroll", () => {
-    if ((frame !== null) !== shouldRun()) sync();
-    else if (frame === null) {
-      bgLevel = bgTarget();
-      paint();
-    }
-  }, { passive: true });
-  if (narrow.addEventListener) narrow.addEventListener("change", bgLayout);
   document.addEventListener("visibilitychange", sync);
   document.addEventListener("motifs:palette", () => {
     if (frame === null) paint();
@@ -816,9 +767,8 @@
 
   // Show the panel before measuring the band.
   panel.hidden = false;
-  if (backdrop) backdrop.classList.add("is-live");
   layout();
-  bgLayout();
   announce(0);
   sync();
 })();
+

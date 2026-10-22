@@ -1,0 +1,46 @@
+---
+---
+{% comment %}
+  One publication's media for the CV timeline (used by _includes/cv_pdf.liquid inside a <template>).
+  The CV text itself comes from the PDF; this adds the figure, method name and links from papers.bib.
+{% endcomment %}
+{% if entry.preview %}
+  {% assign preview_ext = entry.preview | split: '.' | last | downcase %}
+  {% if preview_ext == 'mp4' %}
+    {% assign figure = entry.preview | replace: '.mp4', '.jpg' %}
+  {% else %}
+    {% assign figure = entry.preview %}
+  {% endif %}
+  {% assign figure_url = figure | prepend: '/assets/img/publication_preview/' | relative_url %}
+{% endif %}
+{% capture method %}{% if entry.method %}{{ entry.method }}{% elsif entry.title contains ':' %}{{ entry.title | split: ':' | first }}{% else %}{{ entry.title }}{% endif %}{% endcapture %}
+<div
+  data-title="{{ entry.title | strip_html | escape }}"
+  data-method="{{ method | strip | escape }}"
+  data-year="{{ entry.year }}"
+  data-venue="{{ entry.abbr | escape }}"
+  {% if figure_url %}
+    data-figure="{{ figure_url }}"
+  {% endif %}
+  {% if entry.url %}
+    data-paper="{{ entry.url }}"
+  {% elsif entry.doi %}
+    data-paper="https://doi.org/{{ entry.doi }}"
+  {% endif %}
+  {% if entry.arxiv %}
+    data-arxiv="https://arxiv.org/abs/{{ entry.arxiv }}"
+  {% endif %}
+  {% if entry.code %}
+    data-code="{{ entry.code }}"
+  {% endif %}
+  {% if entry.website %}
+    data-website="{{ entry.website }}"
+  {% endif %}
+  {% if entry.pdf %}
+    {% if entry.pdf contains '://' %}
+      data-pdf="{{ entry.pdf }}"
+    {% else %}
+      data-pdf="{{ entry.pdf | prepend: '/assets/pdf/' | relative_url }}"
+    {% endif %}
+  {% endif %}
+></div>

@@ -9,10 +9,6 @@ profile:
   align: right
   image: personal/menal_ml_portrait.jpg
   image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>Max-Planck-Institut für Informatik </p>
-    <p>Saarland Informatics Campus </p>
-    <p>Campus E1 4 66123 Saarbrücken, Germany</p>
 
 news: true # includes a list of news items
 selected_papers: true # includes a list of papers marked as "selected={true}"

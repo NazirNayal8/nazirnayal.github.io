@@ -1,4 +1,6 @@
-// The web CV is generated from the downloadable PDF, with native details controls.
+// The CV (generated from the downloadable PDF): a 3D timeline for education and experience, floating
+// cards elsewhere, a full-screen view for any card (assets/js/cv.js), chips for lists, and a timeline
+// bar on every dated entry.
 .editorial-site .cv-page {
   .post-title { max-width: none; }
   [hidden] { display: none !important; }
@@ -20,123 +22,391 @@
     &:hover { background: var(--global-hover-color); }
   }
 
-  .cv-controls {
+  // Section filters and search.
+  .cv-toolbar {
+    position: sticky;
+    top: 88px;
+    z-index: 5;
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
-    padding: 16px;
-    margin-bottom: 40px;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 12px 0;
+    margin-bottom: 18px;
+    background: var(--editorial-header);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .cv-filters { display: flex; flex-wrap: wrap; gap: 4px 6px; flex: 1 1 520px; }
+  .cv-filters button {
+    padding: 3px 11px;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--global-text-color);
+    font: 0.72rem/1.6 var(--editorial-mono);
+    cursor: pointer;
+    &:hover { color: var(--global-theme-color); border-color: var(--global-theme-color); }
+    &[aria-pressed="true"] { color: var(--editorial-accent-text); background: var(--editorial-accent-soft); border-color: var(--global-theme-color); }
+  }
+  #cv-search {
+    flex: 0 1 280px;
+    min-width: 180px;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--global-text-color);
     background: var(--global-card-bg-color);
     border: 1px solid var(--global-divider-color);
-    border-radius: 6px;
-    input {
-      flex: 1;
-      width: 100%;
-      min-width: 180px;
-      padding: 10px 12px;
-      font: inherit;
-      font-size: 0.85rem;
-      color: var(--global-text-color);
-      background: var(--global-bg-color);
-      border: 1px solid var(--global-divider-color);
-      border-radius: 4px;
-      &::placeholder { color: var(--global-text-color-light); opacity: 1; }
-    }
-  }
-  .cv-expand-controls { display: flex; flex-shrink: 0; gap: 8px; }
-  .cv-expand-controls button {
-    min-height: 42px;
-    padding: 7px 12px;
-    font: inherit;
-    font-size: 0.75rem;
-    color: var(--global-text-color);
-    background: transparent;
-    border: 1px solid var(--global-divider-color);
-    border-radius: 4px;
-    cursor: pointer;
-    &:hover { color: var(--editorial-accent-text); background: var(--editorial-accent-soft); border-color: var(--global-theme-color); }
+    border-radius: 999px;
+    &::placeholder { color: var(--global-text-color); opacity: 1; }
+    &:focus { outline: none; border-color: var(--global-theme-color); box-shadow: 0 0 0 3px var(--editorial-accent-soft); }
   }
 
-  .cv-layout { display: grid; grid-template-columns: 175px minmax(0, 1fr); gap: 48px; align-items: start; }
-  .cv-section-nav {
-    position: sticky;
-    top: 112px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    border-left: 1px solid var(--global-divider-color);
-    padding-left: 16px;
-    a { font-size: 0.78rem; line-height: 1.65; padding: 6px 0; color: var(--global-text-color-light); }
-    a:hover, a:focus-visible { color: var(--global-theme-color); }
-  }
-  .cv-document { min-width: 0; }
-  .cv-section { border-top: 1px solid var(--global-divider-color); scroll-margin-top: 110px; }
-  .cv-section summary {
+  .cv-group { margin: 0 0 48px; scroll-margin-top: 150px; }
+  .cv-group-title {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 22px 0;
+    gap: 12px;
+    margin: 0 0 18px;
+    font-size: 1.35rem;
+    letter-spacing: -0.03em;
+    &::after { content: ""; flex: 1; height: 1px; background: var(--global-divider-color); }
+  }
+  .cv-count { font: 0.72rem/1 var(--editorial-mono); color: var(--editorial-accent-text); }
+
+  // Cards: a grid of gently floating tiles.
+  .cv-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 18px;
+    padding: 0;
+    margin: 0;
     list-style: none;
-    cursor: pointer;
-    &::-webkit-details-marker { display: none; }
-    h2 { margin: 0; font-size: 1.4rem; letter-spacing: -0.035em; }
-    > i { font-size: 1rem; color: var(--global-text-color-light); transition: transform 180ms ease; }
-    &:hover h2 { color: var(--global-theme-color); }
   }
-  .cv-section[open] > summary > i { transform: rotate(180deg); }
-  .cv-section-content { padding-bottom: 28px; }
-  .cv-entry + .cv-entry { margin-top: 28px; }
-  .cv-entry-heading {
+  .cv-card-slot { display: flex; }
+  .cv-card {
+    position: relative;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    column-gap: 22px;
-    row-gap: 7px;
-    margin-bottom: 5px;
-    h3 { flex: 1 1 260px; font-size: 1.03rem; font-weight: 550; line-height: 1.6; margin: 0; letter-spacing: -0.02em; }
+    flex-direction: column;
+    width: 100%;
+    padding: 18px 18px 16px;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 12px;
+    background: var(--global-card-bg-color);
+    transition: transform 320ms var(--editorial-ease), border-color 220ms ease, box-shadow 320ms ease;
   }
-  .cv-date { font: 0.73rem/1.7 var(--editorial-mono); color: var(--global-text-color); margin: 0; }
-  .cv-role { font-size: 0.9rem; line-height: 1.8; margin: 0; }
-  .cv-location { color: var(--global-text-color-light); font-size: 0.8rem; margin: 3px 0 8px; }
-  .cv-entry ul { margin: 9px 0 0; padding-left: 19px; }
-  .cv-entry li, .cv-item-list li, .cv-section-content > p { font-size: 0.9rem; line-height: 1.85; }
-  .cv-item-list { margin: 0; padding-left: 20px; }
-  .cv-item-list li + li { margin-top: 12px; }
+  .cv-card:hover, .cv-card:focus-within {
+    transform: translateY(-4px);
+    border-color: var(--global-theme-color);
+    box-shadow: var(--editorial-shadow);
+  }
+  .cv-card.is-lifted { visibility: hidden; }
+
+  .cv-emblem {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    margin-bottom: 14px;
+    img { display: block; max-width: 150px; max-height: 38px; width: auto; height: auto; }
+    .logo-dark { display: none; }
+  }
+  .cv-monogram {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--editorial-accent-soft);
+    color: var(--editorial-accent-text);
+    font: 600 0.8rem/1 var(--editorial-mono);
+    letter-spacing: -0.02em;
+    overflow: hidden;
+    .cv-pattern { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--global-theme-color); opacity: 0.18; }
+    span { position: relative; }
+    &[data-length="4"] { font-size: 0.66rem; }
+    &[data-length="5"], &[data-length="6"] { width: auto; min-width: 42px; padding: 0 8px; font-size: 0.62rem; }
+  }
+  .cv-card-title { margin: 0 0 4px; font-size: 1rem; font-weight: 550; line-height: 1.4; letter-spacing: -0.02em; }
+  .cv-card-role { margin: 0 0 10px; font-size: 0.86rem; line-height: 1.55; }
+  .cv-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin: auto 0 0;
+    font: 0.7rem/1.7 var(--editorial-mono);
+    color: var(--global-text-color);
+  }
+  .cv-date { color: var(--editorial-accent-text); }
+  .cv-card-details { margin: 10px 0 0; padding-left: 18px; font-size: 0.84rem; line-height: 1.7; }
+  // The entry's span on the shared timeline.
+  .cv-span { position: relative; display: block; height: 3px; margin-top: 14px; border-radius: 2px; background: var(--global-divider-color); }
+  .cv-span-bar { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--global-theme-color); }
+  .cv-span-bar.is-ongoing { background: linear-gradient(90deg, var(--global-theme-color) 70%, var(--editorial-accent-soft)); }
+  // The whole card opens the sheet.
+  .cv-card-open {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+    &:focus-visible { outline: 2px solid var(--global-theme-color); outline-offset: 3px; }
+  }
+
+  // With the script, details live in the sheet; without it they stay in the card.
+  &.cv-js .cv-card-details { display: none; }
+
+  // Lists: chips, and compact publications.
+  .cv-chips { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 12px; }
+  .cv-chips-label { font: 0.72rem/1.8 var(--editorial-mono); color: var(--editorial-accent-text); min-width: 90px; }
+  .cv-chips ul { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+  .cv-chips li {
+    padding: 5px 12px;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 999px;
+    background: var(--global-card-bg-color);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .cv-pubs { margin: 0 0 12px; padding-left: 22px; }
+  .cv-pubs li { padding: 6px 0; font-size: 0.88rem; line-height: 1.75; }
+  .cv-group > p { font-size: 0.92rem; }
+
+  .cv-no-results { padding: 24px; background: var(--editorial-surface); border-radius: 8px; }
   .cv-source-contact {
     border-top: 1px solid var(--global-divider-color);
     padding: 20px 0;
-    summary { font-size: 0.8rem; color: var(--global-text-color-light); cursor: pointer; }
+    summary { font-size: 0.8rem; cursor: pointer; }
     p { font-size: 0.8rem; margin: 10px 0 0; overflow-wrap: anywhere; }
   }
-  .cv-no-results { padding: 24px; background: var(--editorial-surface); border-radius: 5px; }
 }
 
-@media (max-width: 991.98px) {
-  .editorial-site .cv-page {
-    .cv-layout { grid-template-columns: 145px minmax(0, 1fr); gap: 28px; }
-    .cv-entry-heading h3 { flex-basis: 100%; }
+html[data-theme="dark"] .editorial-site .cv-page .cv-emblem {
+  .logo-light:not(:only-child) { display: none; }
+  .logo-dark { display: block; }
+}
+
+// Floating: each card drifts slowly on its own phase (independent of the hover lift).
+@media (prefers-reduced-motion: no-preference) {
+  .editorial-site .cv-page.cv-js .cv-card {
+    animation: cv-float var(--float-duration, 7s) ease-in-out var(--float-delay, 0s) infinite;
   }
 }
+@keyframes cv-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+// The 3D timeline for education and experience (assets/js/cv.js): a line soaring left to right,
+// drawn on a canvas, with the cards floating along it. Narrow screens get a vertical line.
+.editorial-site .cv-orbit {
+  position: relative;
+  .cv-orbit-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cv-cards { position: relative; z-index: 1; }
+  .cv-card { animation: none !important; }
+}
+.editorial-site .cv-orbit.is-orbit {
+  margin: 8px 0 12px;
+  .cv-cards { display: block; height: 100%; }
+  .cv-card-slot { position: absolute; top: 0; left: 0; will-change: transform; }
+  .cv-card { padding: 14px 14px 12px; box-shadow: var(--editorial-shadow); }
+  .cv-emblem { height: 32px; margin-bottom: 10px; img { max-height: 30px; max-width: 120px; } }
+  .cv-monogram { width: 32px; height: 32px; border-radius: 8px; font-size: 0.66rem; }
+  .cv-card-title, .cv-card-role { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .cv-card-title { font-size: 0.92rem; }
+  .cv-card-role { font-size: 0.8rem; margin-bottom: 8px; }
+  .cv-place { display: none; }
+  .cv-span { margin-top: 10px; }
+}
+.editorial-site .cv-orbit.is-column .cv-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-left: 40px; }
+
+// Publication cards carry the paper's main figure.
+.editorial-site .cv-page .cv-figure {
+  display: block;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 12px;
+  img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; padding: 6px; background: #fff; border: 1px solid var(--global-divider-color); border-radius: 7px; }
+}
+.editorial-site .cv-orbit.is-orbit {
+  .cv-figure { height: 96px; margin-bottom: 10px; img { max-width: none; max-height: none; } }
+  .cv-pub-card .cv-card-title { font-size: 1.02rem; -webkit-line-clamp: 2; }
+  .cv-pub-card .cv-place { display: inline; }
+}
+
+// Rings (assets/js/cv.js): entries and lists circling a slowly turning star.
+.editorial-site .cv-ring {
+  position: relative;
+  .cv-ring-canvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+}
+.editorial-site .cv-ring.is-ring {
+  margin: 8px 0 18px;
+  .cv-ring-canvas { display: block; }
+  .cv-cards { display: block; position: static; height: 100%; }
+  .cv-card-slot { position: absolute; top: 0; left: 0; will-change: transform; }
+  .cv-card { animation: none !important; padding: 14px 14px 12px; box-shadow: var(--editorial-shadow); }
+  .cv-emblem { height: 32px; margin-bottom: 10px; img { max-height: 30px; max-width: 120px; } }
+  .cv-monogram { width: 32px; height: 32px; border-radius: 8px; font-size: 0.66rem; }
+  .cv-card-title, .cv-card-role { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .cv-card-title { font-size: 0.92rem; }
+  .cv-card-role { font-size: 0.8rem; margin-bottom: 8px; }
+  .cv-span { margin-top: 10px; }
+  // Chips: each list's items placed on its ring; the list's label is drawn beside the ring.
+  .cv-chips, .cv-chips ul { display: block; position: static; margin: 0; }
+  .cv-chips li { position: absolute; top: 0; left: 0; white-space: nowrap; will-change: transform; box-shadow: var(--editorial-shadow); }
+  .cv-chips-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+// Card view: a compact panel grows out of the card (transform and clip-path) and the page dims behind it.
+.editorial-site .cv-focus {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  padding: 16px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--global-text-color);
+  transition: background-color 420ms ease, backdrop-filter 420ms ease;
+  &[open] { display: grid; place-items: center; }
+  &::backdrop { background: transparent; }
+  &.is-open {
+    background: rgba(248, 248, 245, 0.62);
+    background: color-mix(in srgb, var(--global-bg-color) 62%, transparent);
+    backdrop-filter: blur(3px);
+  }
+}
+.editorial-site .cv-focus-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(600px, 100%);
+  max-height: min(84vh, 780px);
+  overflow: hidden;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 16px;
+  background: var(--global-card-bg-color);
+  box-shadow: 0 30px 80px rgba(20, 32, 29, 0.16), 0 4px 14px rgba(20, 32, 29, 0.06);
+}
+html[data-theme="dark"] .editorial-site .cv-focus-panel { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25); }
+.editorial-site .cv-focus-body {
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 30px 40px 34px;
+}
+.editorial-site .cv-focus {
+  .cv-focus-body, .cv-focus-close { opacity: 0; transform: translateY(10px); transition: opacity 320ms ease, transform 480ms var(--editorial-ease); }
+  &.is-shown {
+    .cv-focus-body, .cv-focus-close { opacity: 1; transform: none; }
+  }
+}
+.editorial-site .cv-focus-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 50%;
+  background: var(--global-card-bg-color);
+  color: var(--global-text-color);
+  cursor: pointer;
+  svg { width: 14px; height: 14px; }
+  &:hover { color: var(--global-theme-color); border-color: var(--global-theme-color); }
+}
+.editorial-site .cv-focus-head {
+  margin: 0 0 22px;
+  .cv-emblem { height: auto; margin: 0; img { max-width: 200px; max-height: 52px; } .logo-dark { display: none; } }
+  .cv-monogram { width: 56px; height: 56px; border-radius: 14px; font-size: 1rem; }
+  .cv-monogram[data-length="4"] { font-size: 0.86rem; }
+  .cv-monogram[data-length="5"], .cv-monogram[data-length="6"] { width: auto; padding: 0 14px; font-size: 0.8rem; }
+}
+html[data-theme="dark"] .editorial-site .cv-focus .cv-emblem {
+  .logo-light:not(:only-child) { display: none; }
+  .logo-dark { display: block; }
+}
+.editorial-site .cv-focus-figure {
+  margin: 26px 0 24px;
+  img { display: block; width: 100%; max-height: 240px; object-fit: contain; padding: 12px; background: #fff; border: 1px solid var(--global-divider-color); border-radius: 10px; }
+}
+.editorial-site .cv-focus-section { margin: 0 0 6px; padding-right: 44px; font: 0.72rem/1.6 var(--editorial-mono); color: var(--editorial-accent-text); }
+.editorial-site .cv-focus-body h2 { margin: 0 0 6px; font-size: clamp(1.4rem, 2.4vw, 1.75rem); font-weight: 500; line-height: 1.2; letter-spacing: -0.03em; }
+.editorial-site .cv-focus-role { margin: 0 0 10px; font-size: 1.02rem; line-height: 1.5; }
+.editorial-site .cv-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  font: 0.74rem/1.7 var(--editorial-mono);
+  .cv-focus-duration { margin-left: 10px; color: var(--editorial-accent-text); }
+}
+.editorial-site .cv-focus-points {
+  margin: 20px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--global-divider-color);
+  list-style: none;
+  li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 10px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    &:last-child { margin-bottom: 0; }
+    &::before { content: ""; position: absolute; left: 0; top: 0.8em; width: 10px; height: 2px; background: var(--global-theme-color); }
+  }
+}
+.editorial-site .cv-focus-authors {
+  margin: 20px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--global-divider-color);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  strong { font-weight: 600; }
+}
+.editorial-site .cv-focus-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0;
+  a {
+    padding: 5px 13px;
+    border: 1px solid var(--global-divider-color);
+    border-radius: 999px;
+    font: 0.74rem/1.6 var(--editorial-mono);
+    text-decoration: none;
+    &:hover { border-color: var(--global-theme-color); }
+  }
+}
+.editorial-site .cv-page .cv-card-slot.is-lifted { visibility: hidden; }
 
 @media (max-width: 767.98px) {
   .editorial-site .cv-page {
-    .cv-layout { display: block; }
-    .cv-section-nav { position: static; display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px 16px; border-left: 0; border-bottom: 1px solid var(--global-divider-color); margin-bottom: 20px; padding: 0 0 18px; }
-    .cv-controls { padding: 12px; margin-bottom: 24px; }
-    .cv-controls input { flex-basis: 100%; min-width: 0; }
-    .cv-section summary h2 { font-size: 1.25rem; }
-    .cv-section summary { padding: 20px 0; }
-    .cv-entry-heading { gap: 5px; }
-    .cv-date { font-size: 0.72rem; }
+    // On a phone the filters wrap to several rows, so the bar scrolls away instead of staying.
+    .cv-toolbar { position: static; }
+    #cv-search { flex: 1 1 100%; }
+    .cv-cards { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   }
+  .editorial-site .cv-focus { padding: 12px; }
+  .editorial-site .cv-focus-panel { max-height: 88vh; }
+  .editorial-site .cv-focus-body { padding: 24px 22px 26px; }
+  .editorial-site .cv-focus-close { top: 10px; right: 10px; }
 }
 
 @media print {
-  .editorial-site .cv-page .cv-controls, .editorial-site .cv-page .cv-section-nav,
-  .editorial-site .cv-page .cv-download, .editorial-site .cv-page .motif { display: none; }
-  .editorial-site .cv-page .cv-layout { display: block; }
-  .editorial-site .cv-page .cv-entry { break-inside: avoid; }
+  .editorial-site .cv-page .cv-toolbar, .editorial-site .cv-page .cv-download, .editorial-site .cv-page .motif, .editorial-site .cv-focus, .editorial-site .cv-orbit-line { display: none !important; }
+  .editorial-site .cv-orbit { height: auto !important; }
+  .editorial-site .cv-orbit .cv-card-slot { position: static !important; transform: none !important; width: auto !important; }
+  .editorial-site .cv-page .cv-card-details { display: block !important; }
+  .editorial-site .cv-page .cv-card { break-inside: avoid; animation: none; }
 }

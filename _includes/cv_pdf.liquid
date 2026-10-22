@@ -1,3 +1,9 @@
+{% comment %}
+  The CV, generated from the PDF (_data/cv_pdf.json). With the script (assets/js/cv.js): education,
+  experience and publications float along 3D timelines; other entries orbit a turning star; lists
+  circle on tilted rings; every card opens full screen. Every field of the PDF is rendered here, so
+  the page keeps content parity with the PDF without JavaScript.
+{% endcomment %}
 {% assign pdf_url = page.cv_pdf | prepend: '/assets/pdf/' | relative_url %}
 <div class="post cv-page" data-cv>
   <header class="post-header has-motif">
@@ -9,60 +15,137 @@
     {% include motif.liquid name='portrait' class='motif-portrait' %}
   </header>
 
-  <div class="cv-controls" hidden>
+  <div class="cv-toolbar" data-cv-toolbar hidden>
+    <div class="cv-filters" role="group" aria-label="Show CV sections">
+      <button type="button" data-cv-filter="all" aria-pressed="true">All</button>
+      {% for section in site.data.cv_pdf.sections %}
+        <button type="button" data-cv-filter="{{ section.id }}" aria-pressed="false">{{ section.title }}</button>
+      {% endfor %}
+    </div>
     <label class="sr-only" for="cv-search">Search CV</label>
     <input type="search" id="cv-search" placeholder="Search roles, skills, or institutions" autocomplete="off">
-    <div class="cv-expand-controls">
-      <button type="button" data-cv-expand>Expand all</button>
-      <button type="button" data-cv-collapse>Collapse all</button>
-    </div>
   </div>
   <p class="cv-search-status sr-only" role="status" aria-live="polite"></p>
 
-  <div class="cv-layout">
-    <nav class="cv-section-nav" aria-label="CV sections">
-      {% for section in site.data.cv_pdf.sections %}
-        <a href="#cv-{{ section.id }}">{{ section.title }}</a>
-      {% endfor %}
-    </nav>
+  <div class="cv-document">
+    {% for section in site.data.cv_pdf.sections %}
+      <section class="cv-group cv-group-{{ section.kind }}" id="cv-{{ section.id }}" data-cv-section="{{ section.id }}">
+        <h2 class="cv-group-title">
+          {{ section.title }}
+          {% if section.kind == 'entries' %}<span class="cv-count">{{ section.items.size }}</span>{% endif %}
+        </h2>
 
-    <article class="cv-document">
-      {% for section in site.data.cv_pdf.sections %}
-        <details class="cv-section" id="cv-{{ section.id }}" open>
-          <summary><h2>{{ section.title }}</h2><i class="ti ti-chevron-down" aria-hidden="true"></i></summary>
-          <div class="cv-section-content">
-            {% if section.kind == 'entries' %}
-              {% for item in section.items %}
-                <div class="cv-entry" data-cv-item>
-                  <div class="cv-entry-heading">
-                    <h3>{{ item.title | escape }}</h3>
-                    <p class="cv-date">{{ item.date | escape }}</p>
-                  </div>
-                  <p class="cv-role">{{ item.subtitle | escape }}</p>
-                  <p class="cv-location">{{ item.location | escape }}</p>
-                  {% if item.bullets.size > 0 %}
-                    <ul>{% for bullet in item.bullets %}<li>{{ bullet | escape }}</li>{% endfor %}</ul>
-                  {% endif %}
-                </div>
+        {% if section.kind == 'entries' %}
+          {% assign orbit = false %}
+          {% if section.id == 'education' or section.id == 'experience' %}{% assign orbit = true %}{% endif %}
+          {% if orbit %}
+            <div class="cv-orbit" data-cv-orbit><canvas class="cv-orbit-line" aria-hidden="true"></canvas>
+          {% else %}
+            <div class="cv-ring cv-ring-cards" data-cv-ring><canvas class="cv-ring-canvas" aria-hidden="true"></canvas>
+          {% endif %}
+          <ul class="cv-cards">
+            {% for item in section.items %}
+              {% assign visual = nil %}
+              {% for rule in site.data.cv_visuals %}
+                {% if item.title contains rule.match %}
+                  {% assign visual = site.data.affiliations | where: 'name', rule.institution | first %}
+                  {% break %}
+                {% endif %}
               {% endfor %}
-            {% elsif section.kind == 'list' %}
-              <ul class="cv-item-list">
-                {% for item in section.items %}<li data-cv-item>{{ item | escape }}</li>{% endfor %}
-              </ul>
-            {% else %}
-              <p data-cv-item>{{ section.text | escape }}</p>
-              {% if section.id == 'projects' %}<a href="{{ '/projects/' | relative_url }}">Explore projects <span aria-hidden="true">↗</span></a>{% endif %}
-            {% endif %}
+              <li class="cv-card-slot" data-cv-item>
+                <article
+                  class="cv-card"
+                  data-cv-card
+                  data-section="{{ section.title | escape }}"
+                  data-date="{{ item.date | escape }}"
+                  {% if visual %}
+                    data-url="{{ visual.url }}"
+                  {% endif %}
+                >
+                  <div class="cv-emblem{% if visual %} has-logo{% endif %}">
+                    {% if visual %}
+                      <img class="logo-light" src="{{ visual.logo | relative_url }}" alt="{{ visual.name | escape }}" loading="lazy" decoding="async">
+                      {% if visual.logo_dark %}
+                        <img class="logo-dark" src="{{ visual.logo_dark | relative_url }}" alt="{{ visual.name | escape }}" loading="lazy" decoding="async">
+                      {% endif %}
+                    {% else %}
+                      <span class="cv-monogram" data-name="{{ item.title | escape }}" aria-hidden="true">{{ item.title | slice: 0 }}</span>
+                    {% endif %}
+                  </div>
+                  <h3 class="cv-card-title">{{ item.title | escape }}</h3>
+                  <p class="cv-card-role">{{ item.subtitle | escape }}</p>
+                  <p class="cv-card-meta">
+                    <span class="cv-date">{{ item.date | escape }}</span>
+                    <span class="cv-place">{{ item.location | escape }}</span>
+                  </p>
+                  {% if item.bullets.size > 0 %}
+                    <ul class="cv-card-details">
+                      {% for bullet in item.bullets %}<li>{{ bullet | escape }}</li>{% endfor %}
+                    </ul>
+                  {% endif %}
+                  <span class="cv-span" aria-hidden="true"><span class="cv-span-bar"></span></span>
+                  <button type="button" class="cv-card-open" data-cv-open aria-haspopup="dialog" hidden>
+                    <span class="sr-only">Open details: {{ item.title | escape }}, {{ item.subtitle | escape }}</span>
+                  </button>
+                </article>
+              </li>
+            {% endfor %}
+          </ul>
           </div>
-        </details>
-      {% endfor %}
 
-      <p class="cv-no-results" hidden>No matching CV entries. Try another search.</p>
+        {% elsif section.kind == 'list' and section.id == 'publications' %}
+          <ol class="cv-pubs">
+            {% for item in section.items %}<li data-cv-item>{{ item | escape }}</li>{% endfor %}
+          </ol>
+          {% comment %} Figures, method names and links from papers.bib, matched to the PDF's entries by title. {% endcomment %}
+          <template data-cv-pub-media>{% bibliography --template cv_pub --group_by none %}</template>
+          <p><a href="{{ '/publications/' | relative_url }}">All publications with abstracts and links <span aria-hidden="true">↗</span></a></p>
 
-      <details class="cv-source-contact">
-        <summary>Contact details in the PDF</summary>
-        {% for line in site.data.cv_pdf.header %}<p>{{ line | escape }}</p>{% endfor %}
-      </details>
-    </article>
+        {% elsif section.kind == 'list' %}
+          <div class="cv-ring cv-ring-chips" data-cv-ring><canvas class="cv-ring-canvas" aria-hidden="true"></canvas>
+          {% for item in section.items %}
+            {% if item contains ': ' %}
+              {% assign label = item | split: ': ' | first %}
+              {% assign rest = item | remove_first: label | remove_first: ': ' %}
+            {% else %}
+              {% assign label = nil %}
+              {% assign rest = item %}
+            {% endif %}
+            <div class="cv-chips" data-cv-item>
+              {% if label %}<span class="cv-chips-label">{{ label | escape }}</span>{% endif %}
+              <ul>
+                {% assign chips = rest | split: ', ' %}
+                {% for chip in chips %}
+                  <li>{% if forloop.last %}{{ chip | strip | remove: '.' | escape }}{% else %}{{ chip | strip | escape }}{% endif %}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+          </div>
+
+        {% else %}
+          <p data-cv-item>
+            {{ section.text | escape }}
+            {% if section.id == 'projects' %}<a href="{{ '/projects/' | relative_url }}">Explore projects <span aria-hidden="true">↗</span></a>{% endif %}
+          </p>
+        {% endif %}
+      </section>
+    {% endfor %}
+
+    <p class="cv-no-results" hidden>No matching CV entries. Try another search.</p>
+
+    <details class="cv-source-contact">
+      <summary>Contact details in the PDF</summary>
+      {% for line in site.data.cv_pdf.header %}<p>{{ line | escape }}</p>{% endfor %}
+    </details>
   </div>
+
+  <dialog class="cv-focus" data-cv-focus aria-labelledby="cv-focus-title">
+    <div class="cv-focus-panel" data-cv-focus-panel>
+      <button type="button" class="cv-focus-close" data-cv-close aria-label="Close">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+      </button>
+      <div class="cv-focus-body" data-cv-focus-body></div>
+    </div>
+  </dialog>
 </div>

@@ -258,17 +258,18 @@ body.editorial-site {
     margin-bottom: 44px;
   }
   .about-header .about-heading { grid-area: heading; align-self: center; }
+  // Photo with the email and profile links centred beneath it.
   .about-header .profile {
     grid-area: profile;
-    display: grid;
-    grid-template-columns: 190px minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    gap: 0 26px;
-    align-items: start;
-    .profile-photo { grid-column: 1; grid-row: 1 / span 2; }
-    .profile-contact { grid-column: 2; grid-row: 1; }
-    .more-info { grid-column: 2; grid-row: 2; }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    .profile-photo { width: 200px; }
     figure { margin: 0; }
+    .profile-contact { margin: 0; text-align: center; }
+    .profile-email { margin-bottom: 10px; }
+    .contact-icons { justify-content: center; }
   }
   .about-statement {
     max-width: 46ch;
@@ -352,21 +353,28 @@ body.editorial-site {
 @media (scripting: none) { .editorial-site .motif, .denoise-progress { display: none !important; } }
 
 // Home: the research showcase (assets/js/home.js) is a wide band drawn into its own canvas.
-// Below the band, the same scene continues faintly in a fixed layer behind the text. Inside
-// main's stacking context the layer sits behind the content; the footer covers it.
-body.page-about .site-main { position: relative; z-index: 1; margin-top: 28px; overflow-x: clip; }
-body.page-about footer { position: relative; z-index: 1; }
-.showcase-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  display: none;
-  pointer-events: none;
-  &.is-live { display: block; }
-  canvas { display: block; width: 100%; height: 100%; }
+body.page-about .site-main { margin-top: 28px; overflow-x: clip; }
+@media (scripting: none) { .showcase-panel { display: none !important; } }
+
+// Site background (assets/js/ambient.js): a fixed canvas behind all content. The page background
+// is painted on the root, so a negative z-index places the canvas above it and below everything else.
+.ambient { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+@media print { .ambient { display: none !important; } }
+.editorial-site footer .ambient-toggle {
+  display: inline;
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--global-text-color);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--global-divider-color);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  &:hover { color: var(--global-theme-color); }
+  &[hidden] { display: none; }
 }
-@media (scripting: none) { .showcase-panel, .showcase-backdrop { display: none !important; } }
-@media print { .showcase-backdrop { display: none !important; } }
 
 .about-page .about-header { position: relative; }
 .about-page .about-heading { position: relative; z-index: 1; }
@@ -811,7 +819,10 @@ body.page-about footer { position: relative; z-index: 1; }
 // Scroll reveals as denoising (assets/js/reveal.js). The real text keeps its place with transparent
 // glyphs (borders, underlines and icons stay); an overlay draws each character on its measured box.
 .dd-unit, .dd-unit * { -webkit-text-fill-color: transparent; }
-.dd-unit i, .dd-unit i::before { -webkit-text-fill-color: currentColor; }
+// Icons, code, maths and decorative marks are not denoised, so they stay visible.
+.dd-unit :is(i, pre, code, mjx-container, d-cite, d-footnote, [aria-hidden="true"]:not(.dd-layer)),
+.dd-unit :is(i, pre, code, mjx-container, d-cite, d-footnote, [aria-hidden="true"]:not(.dd-layer)) *,
+.dd-unit i::before { -webkit-text-fill-color: currentColor; }
 .dd-host { position: relative; }
 .dd-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; user-select: none; }
 .dd-g {
@@ -828,15 +839,11 @@ body.page-about footer { position: relative; z-index: 1; }
 .dd-media { filter: blur(var(--dd-blur, 0px)); }
 .dd-noise { position: absolute; z-index: 1; pointer-events: none; background-size: 96px 96px; }
 
-@keyframes editorial-enter {
-  from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .editorial-site .post-header, .editorial-site .header-bar, .editorial-site d-title { animation: editorial-enter 700ms var(--editorial-ease) both; }
-  .editorial-site .about-intro { animation: editorial-enter 800ms 100ms var(--editorial-ease) both; }
-}
+// Page load: until reveal.js has drawn the first screen as noise, the text in main is hidden, so the
+// real text never flashes. If that script does not run, the text appears after 2.5 s.
+html.dd-boot main { -webkit-text-fill-color: transparent; animation: dd-boot-failsafe 0s 2.5s forwards; }
+html.dd-boot main :is(i, svg, mjx-container, d-cite, d-footnote) { -webkit-text-fill-color: currentColor; }
+@keyframes dd-boot-failsafe { to { -webkit-text-fill-color: currentColor; } }
 
 // Theme changes affect colors only, keeping layout and motion stable.
 html.transition, html.transition *, html.transition *::before, html.transition *::after {
@@ -853,7 +860,7 @@ html.transition, html.transition *, html.transition *::before, html.transition *
   #navbar .navbar-nav .nav-item .nav-link { text-align: left; padding: 10px 12px; font-size: 0.95rem; }
   #navbar .navbar-nav .nav-item .nav-link::after { display: none; }
   #navbar .navbar-nav .nav-item.active > .nav-link { background: var(--editorial-accent-soft); border-radius: 5px; }
-  .about-page .about-header .profile { grid-template-columns: 150px minmax(0, 1fr); gap: 0 20px; }
+  .about-page .about-header .profile .profile-photo { width: 170px; }
   .editorial-site .post-header.has-motif { grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 24px 32px; }
 }
 
@@ -906,13 +913,7 @@ html.transition, html.transition *, html.transition *::before, html.transition *
   .about-page {
     .about-header .post-title { font-size: clamp(2.4rem, 10vw, 3.1rem); margin-bottom: 14px; }
     .about-statement { font-size: 1.02rem; }
-    .about-header .profile { grid-template-columns: 115px minmax(0, 1fr); gap: 14px 20px; }
-    .profile figure { margin: 0; }
-    .about-header .profile .profile-photo { grid-row: 1; }
-    .profile .more-info { padding-top: 0; border-top: 0; align-self: center; }
-    .about-header .profile .more-info { grid-column: 2; grid-row: 1; }
-    .profile .more-info p { font-size: 0.84rem; }
-    .about-header .profile .profile-contact { grid-column: 1 / -1; grid-row: 2; margin: 0; }
+    .about-header .profile .profile-photo { width: 160px; }
     .about-copy { font-size: 0.94rem; }
   }
   .editorial-site .publications ol.bibliography {

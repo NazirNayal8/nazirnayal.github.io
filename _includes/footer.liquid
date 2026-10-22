@@ -30,6 +30,7 @@
       {% if site.last_updated %}
         Last updated: {{ 'now' | date: '%B %d, %Y' }}.
       {% endif %}
+      <button type="button" class="ambient-toggle" data-ambient-toggle aria-pressed="false" hidden>Pause background animation</button>
     </div>
   </footer>
 {% endif %}
