@@ -31,11 +31,29 @@
   const gauss = () => Math.sqrt(-2 * Math.log(Math.random() || 1e-6)) * Math.cos(TAU * Math.random());
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  const canvas = document.createElement("canvas");
-  canvas.className = "ambient";
-  canvas.setAttribute("aria-hidden", "true");
-  document.body.prepend(canvas);
-  const ctx = canvas.getContext("2d");
+  // Layers. The mosaic changes slowly, so it is redrawn only now and then, on one of two canvases: the
+  // new drawing fades in over the previous one, so its changes of shape look continuous, and in
+  // between a CSS transform carries the drift and the scroll parallax (off the main thread). Each
+  // mosaic canvas overhangs the window by MARGIN on every side, so the transform never uncovers an
+  // edge. The words layer is drawn only while a phrase is on screen.
+  const MARGIN = 48;
+  const layer = (className) => {
+    const c = document.createElement("canvas");
+    c.className = className;
+    c.setAttribute("aria-hidden", "true");
+    return c;
+  };
+  const mosaics = [0, 1].map(() => {
+    const c = layer("ambient ambient-mosaic");
+    return { c, g: c.getContext("2d"), at: 0, scroll: 0 };
+  });
+  const wordsCanvas = layer("ambient ambient-words");
+  document.body.prepend(mosaics[0].c, mosaics[1].c, wordsCanvas);
+  const wctx = wordsCanvas.getContext("2d");
+  // The first mosaic canvas carries the state for previews and tests (data-design, -phase, -word).
+  const canvas = mosaics[0].c;
+  let front = 0;
+  let mctx = mosaics[0].g;
 
   let width = 0;
   let height = 0;
@@ -182,7 +200,7 @@
     const oy = time * drift[1] - (window.scrollY || 0) * 0.06;
     const det = ax * by - ay * bx;
     const toLattice = (x, y) => [((x - ox) * by - (y - oy) * bx) / det, ((y - oy) * ax - (x - ox) * ay) / det];
-    const corners = [toLattice(0, 0), toLattice(width, 0), toLattice(0, height), toLattice(width, height)];
+    const corners = [toLattice(-MARGIN, -MARGIN), toLattice(width + MARGIN, -MARGIN), toLattice(-MARGIN, height + MARGIN), toLattice(width + MARGIN, height + MARGIN)];
     const margin = 3;
     const iMin = Math.floor(Math.min(...corners.map((p) => p[0]))) - margin;
     const iMax = Math.ceil(Math.max(...corners.map((p) => p[0]))) + margin;
@@ -215,8 +233,8 @@
     }
     const strength = palette.dark ? 0.24 : 0.28;
     const band = design.style === "band";
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    mctx.lineCap = "round";
+    mctx.lineJoin = "round";
     buckets.forEach((segments, level) => {
       if (!segments.length) return;
       const path = new Path2D();
@@ -225,34 +243,33 @@
         path.lineTo(segments[k + 2], segments[k + 3]);
       }
       const alpha = strength * (0.4 + 0.6 * (level / (LEVELS - 1)));
-      ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = rgba(palette.accent, alpha);
+      mctx.globalCompositeOperation = "source-over";
+      mctx.strokeStyle = rgba(palette.accent, alpha);
       if (band) {
         // A band, then its centre carved out: strapwork.
-        ctx.lineWidth = narrow.matches ? 3 : 3.8;
-        ctx.stroke(path);
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.strokeStyle = "rgba(0,0,0,1)";
-        ctx.lineWidth = narrow.matches ? 1.1 : 1.5;
-        ctx.stroke(path);
+        mctx.lineWidth = narrow.matches ? 3 : 3.8;
+        mctx.stroke(path);
+        mctx.globalCompositeOperation = "destination-out";
+        mctx.strokeStyle = "rgba(0,0,0,1)";
+        mctx.lineWidth = narrow.matches ? 1.1 : 1.5;
+        mctx.stroke(path);
       } else {
-        ctx.lineWidth = 1.15;
-        ctx.stroke(path);
+        mctx.lineWidth = 1.15;
+        mctx.stroke(path);
       }
     });
-    ctx.globalCompositeOperation = "source-over";
+    mctx.globalCompositeOperation = "source-over";
   };
 
   // Strong at the sides, faint over the central column (where the page's animations are).
-  const quietCentre = () => {
-    ctx.globalCompositeOperation = "destination-out";
+  const quietCentre = (g, x0, x1) => {
+    g.globalCompositeOperation = "destination-out";
     if (narrow.matches) {
-      ctx.fillStyle = "rgba(0,0,0,0.62)";
-      ctx.fillRect(0, 0, width, height);
+      g.fillStyle = "rgba(0,0,0,0.62)";
     } else {
       const column = Math.min(width, 1120);
       const left = (width - column) / 2;
-      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      const gradient = g.createLinearGradient(0, 0, width, 0);
       const edgeStop = clamp((left - 40) / width, 0, 0.45);
       const columnStop = clamp((left + 60) / width, 0.01, 0.48);
       gradient.addColorStop(0, "rgba(0,0,0,0)");
@@ -262,10 +279,10 @@
       gradient.addColorStop(1 - columnStop, "rgba(0,0,0,0.8)");
       gradient.addColorStop(1 - edgeStop, "rgba(0,0,0,0.12)");
       gradient.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
+      g.fillStyle = gradient;
     }
-    ctx.globalCompositeOperation = "source-over";
+    g.fillRect(x0, -MARGIN, x1 - x0, height + 2 * MARGIN);
+    g.globalCompositeOperation = "source-over";
   };
 
   /* ---------- Words: small calligraphy carried along the side margins ---------- */
@@ -640,25 +657,25 @@
     const formed = smooth(arrived / piece.arrivals.length);
     const fading = 1 - smooth((age - piece.leave) / 1.1);
     if (formed > 0.01 && fading > 0.01) {
-      ctx.save();
-      ctx.translate(c[0], c[1]);
-      // Clear the mosaic softly behind the phrase (an oval cartouche), so the letters read.
-      ctx.save();
-      ctx.scale(piece.w / 2 + 16, piece.h / 2 + 16);
-      const clearing = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      wctx.save();
+      wctx.translate(c[0], c[1]);
+      // Veil the mosaic softly behind the phrase (an oval cartouche of the page's own background),
+      // so the letters read.
+      wctx.save();
+      wctx.scale(piece.w / 2 + 16, piece.h / 2 + 16);
+      const clearing = wctx.createRadialGradient(0, 0, 0, 0, 0, 1);
       const depth = 0.8 * formed * fading;
-      clearing.addColorStop(0, `rgba(0,0,0,${depth.toFixed(3)})`);
-      clearing.addColorStop(0.6, `rgba(0,0,0,${(depth * 0.75).toFixed(3)})`);
-      clearing.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = clearing;
-      ctx.beginPath();
-      ctx.arc(0, 0, 1, 0, TAU);
-      ctx.fill();
-      ctx.restore();
-      ctx.globalAlpha = ink * Math.pow(formed, 1.4) * fading;
-      ctx.drawImage(piece.tint, -piece.w / 2, -piece.h / 2);
-      ctx.restore();
+      clearing.addColorStop(0, rgba(palette.bg, depth.toFixed(3)));
+      clearing.addColorStop(0.6, rgba(palette.bg, (depth * 0.75).toFixed(3)));
+      clearing.addColorStop(1, rgba(palette.bg, 0));
+      wctx.fillStyle = clearing;
+      wctx.beginPath();
+      wctx.arc(0, 0, 1, 0, TAU);
+      wctx.fill();
+      wctx.restore();
+      wctx.globalAlpha = ink * Math.pow(formed, 1.4) * fading;
+      wctx.drawImage(piece.tint, -piece.w / 2, -piece.h / 2);
+      wctx.restore();
     }
     const birds = new Path2D();
     const dots = new Path2D();
@@ -706,73 +723,160 @@
     });
     const tone = rgba(palette.accent, 1);
     const strength = ink * 0.85;
-    ctx.lineCap = "round";
+    wctx.lineCap = "round";
     if (piece.mode === "birds") {
-      ctx.globalAlpha = strength;
-      ctx.strokeStyle = tone;
-      ctx.lineWidth = 1;
-      ctx.stroke(birds);
+      wctx.globalAlpha = strength;
+      wctx.strokeStyle = tone;
+      wctx.lineWidth = 1;
+      wctx.stroke(birds);
     } else if (piece.mode === "light") {
-      ctx.globalAlpha = strength * 0.25;
-      ctx.fillStyle = tone;
-      ctx.fill(halos);
-      ctx.globalAlpha = strength;
-      ctx.fill(dots);
+      wctx.globalAlpha = strength * 0.25;
+      wctx.fillStyle = tone;
+      wctx.fill(halos);
+      wctx.globalAlpha = strength;
+      wctx.fill(dots);
     } else {
-      ctx.strokeStyle = tone;
-      ctx.lineWidth = piece.mode === "water" ? 1.1 : 0.8;
+      wctx.strokeStyle = tone;
+      wctx.lineWidth = piece.mode === "water" ? 1.1 : 0.8;
       [0.25, 0.55, 1].forEach((k, band) => {
-        ctx.globalAlpha = strength * k;
-        ctx.stroke(streaks[band]);
+        wctx.globalAlpha = strength * k;
+        wctx.stroke(streaks[band]);
       });
     }
-    ctx.globalAlpha = 1;
+    wctx.globalAlpha = 1;
     if (!alive && age > piece.leave) piece = null;
   };
 
   /* ---------- Loop ---------- */
+  let mosaicRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+  const sizeMosaics = () => {
+    mosaics.forEach((m) => {
+      m.c.width = Math.round((width + 2 * MARGIN) * mosaicRatio);
+      m.c.height = Math.round((height + 2 * MARGIN) * mosaicRatio);
+      // Sized here rather than in CSS: the site's CSS minifier breaks calc().
+      Object.assign(m.c.style, { left: `${-MARGIN}px`, top: `${-MARGIN}px`, right: "auto", bottom: "auto", width: `${width + 2 * MARGIN}px`, height: `${height + 2 * MARGIN}px` });
+      m.g.setTransform(mosaicRatio, 0, 0, mosaicRatio, MARGIN * mosaicRatio, MARGIN * mosaicRatio);
+    });
+    dirty = true;
+  };
   const resize = () => {
     const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    sizeMosaics();
+    wordsCanvas.width = Math.round(width * ratio);
+    wordsCanvas.height = Math.round(height * ratio);
+    wctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     edge = design.edge * sizeJitter * (narrow.matches ? 0.82 : 1);
   };
 
-  const render = () => {
-    ctx.clearRect(0, 0, width, height);
+  // How long a drawing of the mosaic takes here, in milliseconds (smoothed). It is measured as the
+  // extra length of the frame that follows a drawing, since the browser rasterises the lines after
+  // the drawing calls return; it sets how often the mosaic is redrawn.
+  let cost = 16;
+  let measuring = false;
+  let dirty = true;
+  // Draw on the canvas behind and fade it in over the one in front, over `fade` milliseconds.
+  const drawMosaicLayer = (fade) => {
+    const back = mosaics[1 - front];
+    mctx = back.g;
+    mctx.clearRect(-MARGIN, -MARGIN, width + 2 * MARGIN, height + 2 * MARGIN);
     drawMosaic();
-    if (!reduced.matches && !paused) {
-      if (!piece && time >= nextAt) {
-        piece = compose();
-        nextAt = time + (piece ? piece.end : 2) + 5 + Math.random() * 7;
-      }
-      if (piece) drawPiece();
+    quietCentre(mctx, -MARGIN, width + MARGIN);
+    back.at = time;
+    back.scroll = window.scrollY || 0;
+    mosaics.forEach((m) => {
+      m.c.style.transition = fade ? `opacity ${fade}ms linear` : "none";
+    });
+    back.c.style.opacity = "1";
+    mosaics[front].c.style.opacity = "0";
+    front = 1 - front;
+    dirty = false;
+    measuring = true;
+  };
+  // Each canvas moves by the drift since it was drawn and by the parallax of any scrolling since. The
+  // mosaic is redrawn every 12 drawing-lengths (between 250 ms and 1.5 s, so it stays a small share of
+  // the main thread), and at once if it has moved near the end of its overhang.
+  const shiftOf = (m) => [drift[0] * (time - m.at), drift[1] * (time - m.at) - ((window.scrollY || 0) - m.scroll) * 0.06];
+  const placeMosaic = (moving) => {
+    const [dx, dy] = shiftOf(mosaics[front]);
+    const interval = clamp(cost * 12, 250, 1500);
+    const far = Math.abs(dx) > MARGIN * 0.75 || Math.abs(dy) > MARGIN * 0.75;
+    const due = moving && (time - mosaics[front].at) * 1000 >= interval;
+    if (dirty) drawMosaicLayer(0);
+    else if (far) drawMosaicLayer(150);
+    else if (due) drawMosaicLayer(Math.min(interval, 900));
+    mosaics.forEach((m) => {
+      const [x, y] = shiftOf(m);
+      m.c.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+    });
+  };
+  // Called with the length of the frame after a drawing. Where drawing stays slow, the mosaic drops
+  // to one canvas pixel per CSS pixel.
+  const noteCost = (frameMs) => {
+    measuring = false;
+    cost = 0.6 * cost + 0.4 * Math.max(0, frameMs - 1000 / 60);
+    if (cost > 60 && mosaicRatio > 1) {
+      mosaicRatio = 1;
+      sizeMosaics();
     }
-    // Words and mosaic alike fade toward the central column.
-    quietCentre();
+  };
+
+  let wordsDrawn = false;
+  const drawWords = () => {
+    if (!piece && time >= nextAt) {
+      piece = compose();
+      nextAt = time + (piece ? piece.end : 2) + 5 + Math.random() * 7;
+    }
+    if (!piece && !wordsDrawn) return;
+    wctx.clearRect(0, 0, width, height);
+    wordsDrawn = Boolean(piece);
+    if (!piece) return;
+    drawPiece();
+    // Fade toward the central column like the mosaic (words are drawn only in the margins).
+    const reach = (width - Math.min(width, 1120)) / 2 + 80;
+    quietCentre(wctx, 0, reach);
+    quietCentre(wctx, width - reach, width);
+  };
+  const clearWords = () => {
+    piece = null;
+    wordsDrawn = false;
+    wctx.clearRect(0, 0, width, height);
+  };
+
+  const status = () => {
     const age = piece ? time - piece.start : -1;
     canvas.dataset.phase = !piece ? "" : age < piece.arrivals[piece.arrivals.length - 1] ? "forming" : age < piece.leave ? "holding" : "leaving";
     canvas.dataset.word = piece ? `${piece.style} ${piece.lines} ${piece.w}x${piece.h} ${centreOf(piece, age).map(Math.round).join(",")}` : "";
   };
 
+  let wordsAt = -1;
   const tick = (now) => {
     const dt = last === null ? 0 : (now - last) / 1000;
-    if (last === null || dt >= 1 / FPS) {
-      last = now;
-      time += Math.min(dt, 0.1);
-      render();
+    if (measuring && last !== null) noteCost(dt * 1000);
+    last = now;
+    time += Math.min(dt, 0.1);
+    placeMosaic(true);
+    if (time - wordsAt >= 1 / FPS) {
+      wordsAt = time;
+      drawWords();
     }
+    status();
     frame = window.requestAnimationFrame(tick);
+  };
+  // With reduced motion, when paused or in a hidden tab: one still frame, moved only by scrolling.
+  const still = () => {
+    clearWords();
+    placeMosaic(false);
+    status();
   };
   const sync = () => {
     if (frame !== null) window.cancelAnimationFrame(frame);
     frame = null;
     last = null;
+    measuring = false;
     if (!reduced.matches && !paused && !document.hidden) frame = window.requestAnimationFrame(tick);
-    else render();
+    else still();
   };
 
   // Footer control: pause or play the background (remembered on this device).
@@ -791,7 +895,6 @@
       } catch (e) {
         /* Not stored; the choice lasts for this page. */
       }
-      if (paused) piece = null;
       label();
       sync();
     });
@@ -801,16 +904,24 @@
     resize();
     loadFonts();
     // A resize invalidates the phrase's position; let it go and start a new one later.
-    piece = null;
-    if (frame === null) render();
+    clearWords();
+    if (frame === null) still();
   });
+  // While still, scrolling only moves the layer (redrawn near the end of its overhang).
+  let scrollQueued = false;
   window.addEventListener("scroll", () => {
-    if (frame === null) render();
+    if (frame !== null || scrollQueued) return;
+    scrollQueued = true;
+    window.requestAnimationFrame(() => {
+      scrollQueued = false;
+      if (frame === null) placeMosaic(false);
+    });
   }, { passive: true });
   document.addEventListener("visibilitychange", sync);
   document.addEventListener("motifs:palette", () => {
     if (piece) piece.tint = tintOf(piece.image);
-    if (frame === null) render();
+    dirty = true;
+    if (frame === null) still();
   });
   if (reduced.addEventListener) {
     reduced.addEventListener("change", () => {

@@ -357,9 +357,11 @@ body.editorial-site {
 body.page-about .site-main { margin-top: 28px; overflow-x: clip; }
 @media (scripting: none) { .showcase-panel { display: none !important; } }
 
-// Site background (assets/js/ambient.js): a fixed canvas behind all content. The page background
-// is painted on the root, so a negative z-index places the canvas above it and below everything else.
+// Site background (assets/js/ambient.js): fixed canvases behind all content. The page background
+// is painted on the root, so a negative z-index places them above it and below everything else.
 .ambient { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+// The mosaic layer overhangs the window (sized in assets/js/ambient.js) and moves by a transform.
+.ambient-mosaic { will-change: transform; }
 @media print { .ambient { display: none !important; } }
 .editorial-site footer .ambient-toggle {
   display: inline;

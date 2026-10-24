@@ -58,6 +58,7 @@
     palette.ink = read("--global-text-color", "#23332e");
     palette.rule = read("--global-divider-color", "#d9e1db");
     palette.soft = read("--editorial-accent-soft", "#e4f2f0");
+    palette.bg = read("--global-bg-color", "#f8f8f5");
     palette.dark = root.getAttribute("data-theme") === "dark";
   };
   const rgba = (rgb, alpha) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha === undefined ? 1 : alpha})`;
