@@ -202,17 +202,18 @@ html[data-theme="dark"] .editorial-site .cv-page .cv-emblem {
 }
 
 // The 3D timeline for education and experience (assets/js/cv.js): a line soaring left to right,
-// drawn on a canvas, with the cards floating along it. Narrow screens get a vertical line.
+// drawn once on a canvas, with the cards floating along it and light travelling on it. Narrow
+// screens get a vertical line.
 .editorial-site .cv-orbit {
   position: relative;
   .cv-orbit-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .cv-cards { position: relative; z-index: 1; }
-  .cv-card { animation: none !important; }
 }
 .editorial-site .cv-orbit.is-orbit {
   margin: 8px 0 12px;
   .cv-cards { display: block; height: 100%; }
-  .cv-card-slot { position: absolute; top: 0; left: 0; will-change: transform; }
+  .cv-card-slot { position: absolute; top: 0; left: 0; }
+  .cv-card-slot.is-hot { z-index: 60 !important; }
   .cv-card { padding: 14px 14px 12px; box-shadow: var(--editorial-shadow); }
   .cv-emblem { height: 32px; margin-bottom: 10px; img { max-height: 30px; max-width: 120px; } }
   .cv-monogram { width: 32px; height: 32px; border-radius: 8px; font-size: 0.66rem; }
@@ -238,16 +239,20 @@ html[data-theme="dark"] .editorial-site .cv-page .cv-emblem {
   .cv-pub-card .cv-place { display: inline; }
 }
 
-// Rings (assets/js/cv.js): entries and lists circling a slowly turning star.
+// Rings (assets/js/cv.js): entries and lists circling a slowly turning star. Items are placed in
+// depth (one 3D context, no perspective), so the browser draws the nearer in front as they turn.
 .editorial-site .cv-ring {
   position: relative;
   .cv-ring-canvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
 }
 .editorial-site .cv-ring.is-ring {
   margin: 8px 0 18px;
-  .cv-ring-canvas { display: block; }
+  transform: translateZ(0);
+  transform-style: preserve-3d;
+  .cv-ring-canvas { display: block; transform: translateZ(-400px); }
+  .cv-fx, .cv-cards, .cv-chips, .cv-chips ul { transform-style: preserve-3d; }
   .cv-cards { display: block; position: static; height: 100%; }
-  .cv-card-slot { position: absolute; top: 0; left: 0; will-change: transform; }
+  .cv-card-slot { position: absolute; top: 0; left: 0; }
   .cv-card { animation: none !important; padding: 14px 14px 12px; box-shadow: var(--editorial-shadow); }
   .cv-emblem { height: 32px; margin-bottom: 10px; img { max-height: 30px; max-width: 120px; } }
   .cv-monogram { width: 32px; height: 32px; border-radius: 8px; font-size: 0.66rem; }
@@ -257,9 +262,30 @@ html[data-theme="dark"] .editorial-site .cv-page .cv-emblem {
   .cv-span { margin-top: 10px; }
   // Chips: each list's items placed on its ring; the list's label is drawn beside the ring.
   .cv-chips, .cv-chips ul { display: block; position: static; margin: 0; }
-  .cv-chips li { position: absolute; top: 0; left: 0; white-space: nowrap; will-change: transform; box-shadow: var(--editorial-shadow); }
+  .cv-chips li { position: absolute; top: 0; left: 0; white-space: nowrap; box-shadow: var(--editorial-shadow); }
   .cv-chips-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+// Moving parts of the timelines and rings, animated by the compositor (assets/js/cv.js).
+.editorial-site .cv-fx { position: absolute; inset: 0; pointer-events: none; }
+.editorial-site .cv-orbit:not(.is-orbit) .cv-fx, .editorial-site .cv-ring:not(.is-ring) .cv-fx { display: none; }
+.editorial-site .cv-light { position: absolute; border-radius: 50%; }
+.editorial-site .cv-spoke { position: absolute; left: 0; top: 0; width: 1px; height: 1px; transform-origin: 0 50%; background: var(--global-theme-color); }
+.editorial-site .cv-now {
+  position: absolute;
+  left: 0;
+  top: 0;
+  span { position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--global-theme-color); transform: scale(0.8); }
+}
+.editorial-site .cv-star { position: absolute; left: 0; top: 0; color: var(--global-theme-color); line-height: 0; svg { display: block; overflow: visible; } }
+@media (prefers-reduced-motion: no-preference) {
+  .editorial-site .cv-now span { animation: cv-pulse 1.3s ease-in-out infinite alternate; }
+  .editorial-site .cv-star svg { animation: cv-turn 63s linear infinite; }
+}
+// Sections off screen (marked by assets/js/cv.js) hold their animations.
+.editorial-site .cv-page .is-offscreen * { animation-play-state: paused !important; }
+@keyframes cv-pulse { from { transform: scale(0.6); } to { transform: scale(1); } }
+@keyframes cv-turn { to { transform: rotate(360deg); } }
 
 // Card view: a compact panel grows out of the card (transform and clip-path) and the page dims behind it.
 .editorial-site .cv-focus {
@@ -404,7 +430,7 @@ html[data-theme="dark"] .editorial-site .cv-focus .cv-emblem {
 }
 
 @media print {
-  .editorial-site .cv-page .cv-toolbar, .editorial-site .cv-page .cv-download, .editorial-site .cv-page .motif, .editorial-site .cv-focus, .editorial-site .cv-orbit-line { display: none !important; }
+  .editorial-site .cv-page .cv-toolbar, .editorial-site .cv-page .cv-download, .editorial-site .cv-page .motif, .editorial-site .cv-focus, .editorial-site .cv-orbit-line, .editorial-site .cv-fx { display: none !important; }
   .editorial-site .cv-orbit { height: auto !important; }
   .editorial-site .cv-orbit .cv-card-slot { position: static !important; transform: none !important; width: auto !important; }
   .editorial-site .cv-page .cv-card-details { display: block !important; }

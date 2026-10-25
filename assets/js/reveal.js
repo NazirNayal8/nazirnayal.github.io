@@ -18,7 +18,8 @@
   "use strict";
 
   const boot = () => document.documentElement.classList.remove("dd-boot");
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+  // The CV page is shown as it is: its cards are already in motion.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window) || document.querySelector("[data-cv]")) {
     boot();
     return;
   }
@@ -34,11 +35,6 @@
     ".projects h2.category",
     ".project-step",
     ".post-list > li",
-    ".cv-group-title",
-    ".cv-card",
-    ".cv-chips",
-    ".cv-pubs > li",
-    ".cv-group > p",
   ].join(", ");
   // Denoised only when the page opens, if they are in the first screen: page headers and the start
   // of articles (long reading is not interrupted by reveals further down).
@@ -310,7 +306,7 @@
     }, delay);
   };
 
-  // On demand, for content that appears later (for example an opened CV card).
+  // On demand, for content that appears later.
   window.Denoise = {
     reveal(element, delay) {
       if (element && !prepared.has(element)) run(element, delay || 0);

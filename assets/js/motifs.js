@@ -469,16 +469,17 @@
       return values;
     };
 
+    // Noise level through a cycle: denoising, a still hold on the clean portrait, then noising again.
+    const sigmaAt = (t) => {
+      const phase = t / CYCLE - Math.floor(t / CYCLE);
+      if (phase < 0.42) return 1 - ease(phase / 0.42);
+      return phase > 0.84 ? ease((phase - 0.84) / 0.16) : 0;
+    };
     const draw = (t) => {
       const c = Math.floor(t / CYCLE);
       const phase = t / CYCLE - c;
-      let sigma = 0;
-      let eps = noise(c);
-      if (phase < 0.42) sigma = 1 - ease(phase / 0.42);
-      else if (phase > 0.84) {
-        sigma = ease((phase - 0.84) / 0.16);
-        eps = noise(c + 1);
-      }
+      const sigma = sigmaAt(t);
+      const eps = noise(phase > 0.84 ? c + 1 : c);
       const cell = Math.min(view.w / cols, (view.h - 16) / rows);
       const ox = (view.w - cell * cols) / 2;
       const oy = (view.h - 16 - cell * rows) / 2;
@@ -497,7 +498,10 @@
       ctx.fill();
       label(ctx, `σ = ${sigma.toFixed(2)}`, ox, view.h - 2);
     };
-    return { draw, still: CYCLE * 0.6 };
+    // During the hold every frame is the same, so none needs drawing again; while it moves, the
+    // sampler steps 24 times a second (thousands of dots each time).
+    const frame = (t) => (sigmaAt(t) === 0 ? "clean" : null);
+    return { draw, frame, fps: 24, still: CYCLE * 0.6 };
   });
 
   /* News: a world model forecasts. The past is observed; from "now" the model samples a
@@ -788,10 +792,18 @@
     let paused = false;
     let visible = true;
 
+    // A motif can name a frame that repeats the last one drawn (motif.frame returns the same key), so
+    // it is not drawn again; null means the frame is new.
+    let shown = null;
     const paint = () => {
       if (!view.w) return;
+      const t = reduced.matches ? motif.still : motif.still + time;
+      const same = motif.frame ? motif.frame(t) : null;
+      const key = same === null ? null : `${same} ${view.w}x${view.h} ${palette.dark} ${palette.accent}`;
+      if (key !== null && key === shown) return;
+      shown = key;
       ctx.clearRect(0, 0, view.w, view.h);
-      motif.draw(reduced.matches ? motif.still : motif.still + time);
+      motif.draw(t);
     };
     const resize = () => {
       const box = canvas.getBoundingClientRect();
@@ -803,12 +815,19 @@
       canvas.height = Math.round(box.height * ratio);
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       if (motif.resize) motif.resize();
+      // Resizing cleared the canvas.
+      shown = null;
       paint();
     };
+    // A motif can ask for fewer frames a second (motif.fps); the others are drawn on every frame.
+    let paintedAt = -Infinity;
     const tick = (now) => {
       if (last !== null) time += Math.min((now - last) / 1000, 0.05);
       last = now;
-      paint();
+      if (!motif.fps || now - paintedAt >= 1000 / motif.fps - 4) {
+        paintedAt = now;
+        paint();
+      }
       frame = window.requestAnimationFrame(tick);
     };
     const sync = () => {

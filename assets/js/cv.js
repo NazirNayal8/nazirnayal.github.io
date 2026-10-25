@@ -1,8 +1,9 @@
-/* CV page. Education and experience float along a timeline in 3D space that soars from left (oldest)
- * to right (now); other dated entries are floating cards. Any card opens full screen: the panel grows
- * out of the card's own rectangle, and retracts into it on close. Also: section filters, search, date
- * bars on a shared timeline, and generated emblems for organizations without a logo. All CV content
- * is in the page already; this script only arranges and animates it. */
+/* CV page. Education, experience and publications float along timelines in 3D space that soar from
+ * left (oldest) to right (now); other entries circle on rings round a turning star. Any card opens in
+ * a card view that grows out of the card's own rectangle and retracts into it on close. Also: section
+ * filters, search, date bars on a shared timeline, and generated emblems for organizations without a
+ * logo. All CV content is in the page already; this script only arranges and animates it, leaving the
+ * motion itself to the browser's compositor. */
 (() => {
   "use strict";
 
@@ -180,20 +181,11 @@
     card.style.setProperty("--float-duration", `${6.5 + (index % 4) * 0.6}s`);
   });
 
-  /* ---------- The 3D timeline ---------- */
-  const orbits = Array.from(root.querySelectorAll("[data-cv-orbit]")).map((container) => {
-    const list = container.querySelector(".cv-cards");
-    const canvas = container.querySelector("canvas");
-    // Oldest first, left to right (and in the reading order of the page).
-    const slots = Array.from(list.children).sort((a, b) => {
-      const sa = spans.get(a.querySelector("[data-cv-card]"));
-      const sb = spans.get(b.querySelector("[data-cv-card]"));
-      return (sa ? sa.start : 0) - (sb ? sb.start : 0);
-    });
-    slots.forEach((slot) => list.appendChild(slot));
-    return { container, list, canvas, ctx: canvas.getContext("2d"), slots, mode: "", w: 0, h: 0, cardW: 0, cardH: 0, hover: -1, pointer: [0, 0], aim: [0, 0] };
-  });
-
+  /* ---------- Timelines and rings: drawn once, moved by the compositor ---------- */
+  // The lines, nodes, threads and labels are drawn once on a canvas (again on resize, theme change or
+  // hover). Everything that moves is left to the browser's compositor, so the motion stays smooth
+  // when the page is busy and no script runs on each frame: cards float (CSS), and lights, spokes,
+  // ring items and the star follow Web Animations of transforms and opacity.
   const palette = () => {
     const style = getComputedStyle(document.documentElement);
     return {
@@ -205,31 +197,73 @@
   };
   let colors = palette();
 
-  // The path: x across, rising towards the right, coming nearer (depth 0.86 to 1).
-  const pathPoint = (o, s, t) => {
-    const x = o.w * (0.07 + 0.86 * s);
-    const rise = 0.24 * smooth(s);
-    const y = o.h * (0.6 - rise) + 14 * Math.sin(TAU * (s * 1.1 + 0.08 * t));
-    const depth = 0.86 + 0.14 * s;
-    return [x, y, depth];
+  const rgba = (color, alpha) => {
+    const probe = rgba.ctx || (rgba.ctx = document.createElement("canvas").getContext("2d"));
+    probe.fillStyle = "#000";
+    probe.fillStyle = color;
+    const hex = probe.fillStyle;
+    if (hex.charAt(0) !== "#") return hex;
+    return `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${alpha})`;
   };
-  // Parallax: nearer points move more with the slow sway and the pointer.
-  const parallax = (o, depth, t) => {
-    const sway = reduced.matches ? 0 : 0.45 * Math.sin(t * 0.21);
-    const k = depth - 0.93;
-    return [(sway + o.pointer[0]) * k * 140, o.pointer[1] * k * 50];
+  const fxLayer = (container, before) => {
+    const fx = document.createElement("div");
+    fx.className = "cv-fx";
+    fx.setAttribute("aria-hidden", "true");
+    container.insertBefore(fx, before);
+    return fx;
+  };
+  const sized = (className, r) => {
+    const el = document.createElement("span");
+    el.className = className;
+    Object.assign(el.style, { width: `${2 * r}px`, height: `${2 * r}px`, left: `${-r}px`, top: `${-r}px` });
+    return el;
+  };
+  // Keep each scene's animations in step across a re-layout: the new ones take over the old time.
+  const replaceAnimations = (scene, make) => {
+    const elapsed = scene.anims.length ? scene.anims[0].currentTime : 0;
+    scene.anims.forEach((a) => a.cancel());
+    scene.anims = [];
+    make();
+    scene.anims.forEach((a) => {
+      a.currentTime = elapsed || 0;
+    });
   };
 
-  const layoutOrbit = (o) => {
+  /* ---------- The 3D timeline ---------- */
+  const orbits = Array.from(root.querySelectorAll("[data-cv-orbit]")).map((container) => {
+    const list = container.querySelector(".cv-cards");
+    const canvas = container.querySelector("canvas");
+    // Oldest first, left to right (and in the reading order of the page).
+    const slots = Array.from(list.children).sort((a, b) => {
+      const sa = spans.get(a.querySelector("[data-cv-card]"));
+      const sb = spans.get(b.querySelector("[data-cv-card]"));
+      return (sa ? sa.start : 0) - (sb ? sb.start : 0);
+    });
+    slots.forEach((slot) => list.appendChild(slot));
+    return { container, list, canvas, ctx: canvas.getContext("2d"), fx: fxLayer(container, list), slots, anims: [], places: [], mode: "", w: 0, h: 0, cardW: 0, cardH: 0, hover: -1 };
+  });
+
+  // The path: x across, rising towards the right, coming nearer (depth 0.86 to 1).
+  const pathPoint = (o, s) => {
+    const x = o.w * (0.07 + 0.86 * s);
+    const rise = 0.24 * smooth(s);
+    const y = o.h * (0.6 - rise) + 14 * Math.sin(TAU * s * 1.1);
+    return [x, y, 0.86 + 0.14 * s];
+  };
+
+  // Lays out, draws and animates a timeline; does nothing if its width, mode and card heights are as
+  // they were (unless forced, as by a change of theme).
+  const layoutOrbit = (o, force) => {
     const width = o.container.clientWidth;
     // While searching (some cards hidden) the timeline becomes a plain list.
     const mode = width >= 880 && !o.container.classList.contains("is-filtered") ? "orbit" : "column";
+    const key = `${mode} ${width} ${o.slots.map((slot) => (slot.hidden ? "-" : slot.offsetHeight)).join(",")}`;
+    if (!force && key === o.key) return;
     o.mode = mode;
     o.container.classList.toggle("is-orbit", mode === "orbit");
     o.container.classList.toggle("is-column", mode === "column");
-    const n = o.slots.length;
     if (mode === "orbit") {
-      const perRow = Math.max(1, Math.ceil(n / 2));
+      const perRow = Math.max(1, Math.ceil(o.slots.length / 2));
       o.cardW = clamp(Math.floor(((0.86 * width) / perRow) * 0.93), 170, 236);
       o.slots.forEach((slot) => {
         slot.style.width = `${o.cardW}px`;
@@ -239,51 +273,58 @@
       o.w = width;
       o.h = Math.round((o.cardH + 30 + 26) / 0.38);
       o.container.style.height = `${o.h}px`;
+      // Cards alternate above and below the line, each at a fixed place along it.
+      const n = o.slots.length;
+      o.places = o.slots.map((slot, i) => {
+        const [x, y, d] = pathPoint(o, (i + 0.5) / n);
+        const above = i % 2 === 0;
+        const gap = 30 * d;
+        const top = above ? y - gap - o.heights[i] : y + gap;
+        slot.style.transformOrigin = above ? "50% 100%" : "50% 0%";
+        slot.style.transform = `translate3d(${(x - o.cardW / 2).toFixed(1)}px, ${top.toFixed(1)}px, 0) scale(${d.toFixed(3)})`;
+        slot.style.zIndex = String(10 + Math.round(d * 10));
+        return { x, y, d, above, gap };
+      });
     } else {
       o.slots.forEach((slot) => {
         slot.style.width = "";
         slot.style.transform = "";
+        slot.style.zIndex = "";
       });
       o.container.style.height = "";
       o.w = width;
       o.h = o.container.clientHeight;
+      o.places = [];
     }
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
     o.canvas.width = Math.round(o.w * ratio);
     o.canvas.height = Math.round(o.h * ratio);
     o.ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    drawOrbit(o);
+    animateOrbit(o);
+    o.key = `${mode} ${width} ${o.slots.map((slot) => (slot.hidden ? "-" : slot.offsetHeight)).join(",")}`;
   };
 
-  const rgba = (color, alpha) => {
-    const probe = rgba.ctx || (rgba.ctx = document.createElement("canvas").getContext("2d"));
-    probe.fillStyle = "#000";
-    probe.fillStyle = color;
-    const hex = probe.fillStyle;
-    if (hex.charAt(0) !== "#") return hex;
-    return `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${alpha})`;
-  };
-
-  const drawOrbit = (o, t) => {
+  const drawOrbit = (o) => {
     const ctx = o.ctx;
     ctx.clearRect(0, 0, o.w, o.h);
-    const n = o.slots.length;
     if (o.mode === "column") {
-      // A line soaring down the left side, with a node beside each card.
+      // A line down the left side, with a node beside each card.
       const x0 = 15;
-      const pts = [];
-      for (let i = 0; i <= 60; i += 1) {
-        const y = (o.h * i) / 60;
-        pts.push([x0 + 3 * Math.sin((y / o.h) * TAU * 1.5 + t * 0.4), y]);
-      }
+      const xAt = (y) => x0 + 3 * Math.sin((y / o.h) * TAU * 1.5);
       ctx.strokeStyle = rgba(colors.accent, 0.5);
       ctx.lineWidth = 2;
       ctx.beginPath();
-      pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+      for (let i = 0; i <= 60; i += 1) {
+        const y = (o.h * i) / 60;
+        if (i) ctx.lineTo(xAt(y), y);
+        else ctx.moveTo(xAt(y), y);
+      }
       ctx.stroke();
       o.slots.forEach((slot) => {
         if (slot.hidden) return;
         const y = slot.offsetTop + Math.min(40, slot.offsetHeight / 2);
-        const x = x0 + 3 * Math.sin((y / o.h) * TAU * 1.5 + t * 0.4);
+        const x = xAt(y);
         ctx.fillStyle = rgba(colors.accent, 1);
         ctx.beginPath();
         ctx.arc(x, y, 4.5, 0, TAU);
@@ -298,12 +339,7 @@
     }
     // The path, thicker and stronger as it comes nearer, with a soft glow.
     const samples = [];
-    for (let i = 0; i <= 90; i += 1) {
-      const s = i / 90;
-      const [x, y, d] = pathPoint(o, s, t);
-      const [px, py] = parallax(o, d, t);
-      samples.push([x + px, y + py, d]);
-    }
+    for (let i = 0; i <= 90; i += 1) samples.push(pathPoint(o, i / 90));
     ctx.lineCap = "round";
     for (let i = 1; i < samples.length; i += 1) {
       const a = samples[i - 1];
@@ -322,82 +358,82 @@
       ctx.lineTo(b[0], b[1]);
       ctx.stroke();
     }
-    // Light travelling from the past to the present.
-    if (!reduced.matches) {
-      for (let k = 0; k < 7; k += 1) {
-        const s = (t * 0.05 + k / 7) % 1;
-        for (let j = 0; j < 8; j += 1) {
-          const q = s - j * 0.006;
-          if (q < 0) continue;
-          const [x, y, d] = pathPoint(o, q, t);
-          const [px, py] = parallax(o, d, t);
-          ctx.fillStyle = rgba(colors.accent, (1 - j / 8) * 0.9 * smooth(s / 0.05) * (1 - smooth((s - 0.95) / 0.05)));
-          ctx.beginPath();
-          ctx.arc(x + px, y + py, (2.6 - j * 0.25) * d, 0, TAU);
-          ctx.fill();
-        }
-      }
-    }
-    // Ends: the earliest year, and now.
+    // Ends: the earliest year, and now (its pulsing dot is in the effects layer).
     ctx.font = `500 11px "Geist Mono", ui-monospace, monospace`;
     ctx.fillStyle = rgba(colors.ink, 1);
     ctx.textAlign = "left";
     const first = samples[0];
     ctx.fillText(String(axisStart), Math.max(2, first[0] - 30), first[1] + 22);
-    const lastPoint = samples[samples.length - 1];
+    const last = samples[samples.length - 1];
     ctx.fillStyle = rgba(colors.accent, 1);
     ctx.textAlign = "right";
-    ctx.fillText("now", lastPoint[0] + 24, lastPoint[1] - 14);
-    ctx.beginPath();
-    ctx.arc(lastPoint[0], lastPoint[1], 3 + 2 * (0.5 + 0.5 * Math.sin(t * 2.4)), 0, TAU);
-    ctx.fill();
-
-    // Cards, nodes and the threads between them.
-    o.slots.forEach((slot, i) => {
-      const s = (i + 0.5) / n;
-      const [x, y, d] = pathPoint(o, s, t);
-      const [px, py] = parallax(o, d, t);
-      const above = i % 2 === 0;
-      const bob = reduced.matches ? 0 : 4 * Math.sin(t * 0.9 + i * 1.7);
-      const gap = 30 * d;
-      const nx = x + px;
-      const ny = y + py;
-      // Above the line the card's bottom meets the thread; below it, its top does.
-      const top = above ? ny - gap - o.heights[i] + bob : ny + gap + bob;
-      slot.style.transformOrigin = above ? "50% 100%" : "50% 0%";
-      slot.style.transform = `translate3d(${(nx - o.cardW / 2).toFixed(1)}px, ${top.toFixed(1)}px, 0) scale(${d.toFixed(3)})`;
-      slot.style.zIndex = String(10 + Math.round(d * 10) + (o.hover === i ? 50 : 0));
+    ctx.fillText("now", last[0] + 24, last[1] - 14);
+    // Nodes, and threads to the cards. A thread runs on under its card, so the card can float.
+    o.places.forEach(({ x, y, d, above, gap }, i) => {
       const hot = o.hover === i;
-      // Thread from the node to the card's edge.
       ctx.strokeStyle = rgba(colors.accent, hot ? 0.9 : 0.4);
       ctx.lineWidth = hot ? 1.6 : 1;
       ctx.beginPath();
-      ctx.moveTo(nx, ny);
-      ctx.lineTo(nx, above ? ny - gap + bob : ny + gap + bob);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, above ? y - gap - 10 : y + gap + 10);
       ctx.stroke();
-      // Node.
       ctx.fillStyle = rgba(colors.accent, 0.18);
       ctx.beginPath();
-      ctx.arc(nx, ny, (hot ? 11 : 8) * d, 0, TAU);
+      ctx.arc(x, y, (hot ? 11 : 8) * d, 0, TAU);
       ctx.fill();
       ctx.fillStyle = rgba(colors.accent, 1);
       ctx.beginPath();
-      ctx.arc(nx, ny, 4 * d, 0, TAU);
+      ctx.arc(x, y, 4 * d, 0, TAU);
       ctx.fill();
       // Start year by the node.
-      const span = spans.get(slot.querySelector("[data-cv-card]"));
+      const span = spans.get(o.slots[i].querySelector("[data-cv-card]"));
       if (span) {
         ctx.fillStyle = rgba(colors.ink, 1);
         ctx.textAlign = "center";
-        ctx.fillText(String(Math.floor(span.start)), nx, above ? ny + 20 : ny - 12);
+        ctx.fillText(String(Math.floor(span.start)), x, above ? y + 20 : y - 12);
+      }
+    });
+  };
+
+  // Light travelling along the line from the past to the present (seven lights, each with a short
+  // trail), and the present pulsing at its end.
+  const LIGHT_PERIOD = 20000;
+  const animateOrbit = (o) => {
+    o.fx.textContent = "";
+    replaceAnimations(o, () => {
+      if (o.mode !== "orbit") return;
+      const [nx, ny] = pathPoint(o, 1);
+      const now = document.createElement("span");
+      now.className = "cv-now";
+      now.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
+      now.appendChild(document.createElement("span"));
+      o.fx.appendChild(now);
+      if (reduced.matches) return;
+      const frames = [];
+      for (let m = 0; m <= 60; m += 1) {
+        const s = m / 60;
+        const [x, y, d] = pathPoint(o, s);
+        frames.push({ offset: s, transform: `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${d.toFixed(3)})`, opacity: smooth(s / 0.05) * (1 - smooth((s - 0.95) / 0.05)) });
+      }
+      for (let k = 0; k < 7; k += 1) {
+        for (let j = 0; j < 4; j += 1) {
+          const dot = sized("cv-light", 2.6 - j * 0.45);
+          dot.style.background = rgba(colors.accent, 0.9 * (1 - j / 4));
+          o.fx.appendChild(dot);
+          const phase = (k / 7 - j * 0.008 + 1) % 1;
+          o.anims.push(dot.animate(frames, { duration: LIGHT_PERIOD, iterations: Infinity, delay: -phase * LIGHT_PERIOD }));
+        }
       }
     });
   };
 
   /* ---------- Rings: entries and lists circling a slowly turning star ---------- */
   // Cards orbit on one tilted ring; chip lists on one ring each (the shorter list inside), the
-  // rings turning in opposite directions. Hovering pauses a ring; focusing an item brings it round
-  // to the front. Narrow screens and searches get a plain layout.
+  // rings turning in opposite directions. Each item follows one revolution of keyframes (the same
+  // for every item of a ring, started at its own angle) and is placed in depth, so the browser draws
+  // the nearer in front (depths 0 to 200, all in front of the lists' own planes, so every item can be
+  // clicked; the star at 100). Hovering eases a ring to a stop; focusing an item turns it to the front.
+  // Narrow screens and searches get a plain layout.
   const rings = Array.from(root.querySelectorAll("[data-cv-ring]")).map((container) => {
     const chips = container.classList.contains("cv-ring-chips");
     const groups = chips
@@ -408,14 +444,25 @@
       : [{ items: Array.from(container.querySelectorAll(".cv-card-slot")), label: "" }];
     groups.sort((a, b) => a.items.length - b.items.length);
     const canvas = container.querySelector("canvas");
-    return { container, chips, groups, canvas, ctx: canvas.getContext("2d"), mode: "", w: 0, h: 0, angle: Math.random() * TAU, speed: 1, hold: false, target: null };
+    return { container, chips, groups, canvas, ctx: canvas.getContext("2d"), fx: fxLayer(container, canvas.nextSibling), anims: [], turning: [], mode: "", w: 0, h: 0, start: Math.random() * TAU, rate: 1, hold: false, focused: false };
   });
   const RING_PHASE = 0.45;
-  const ringSpeed = (r) => (TAU / (r.chips ? 70 : 90));
+  const RING_LIGHT_PERIOD = (TAU / 0.5) * 1000;
+  const turnPeriod = (r) => (r.chips ? 70000 : 90000);
+  const ringSign = (k) => (k % 2 ? -1 : 1);
+  // An item's angle on ring k at time zero, and the delay that starts a revolution of keyframes
+  // (from angle 0, in the ring's direction) at that angle.
+  const startAngle = (r, k, i, n) => (TAU * i) / n + k * RING_PHASE + r.start;
+  const startOf = (angle, sign) => ((((sign * angle) / TAU) % 1) + 1) % 1;
+  const delayFor = (angle, sign, period) => -startOf(angle, sign) * period;
+  const depthAt = (theta) => (Math.sin(theta) + 1) / 2;
 
-  const layoutRing = (r) => {
+  const layoutRing = (r, force) => {
     const width = r.container.clientWidth;
     const mode = width >= 720 && !r.container.classList.contains("is-filtered") ? "ring" : "flat";
+    const key = `${mode} ${width}`;
+    if (!force && key === r.key) return;
+    r.key = key;
     r.mode = mode;
     r.container.classList.toggle("is-ring", mode === "ring");
     r.container.classList.toggle("is-flat", mode === "flat");
@@ -423,7 +470,6 @@
     if (mode === "flat") {
       items.forEach((el) => {
         el.style.transform = "";
-        el.style.zIndex = "";
         el.style.width = "";
       });
       r.container.style.height = "";
@@ -457,50 +503,12 @@
     r.canvas.width = Math.round(r.w * ratio);
     r.canvas.height = Math.round(r.h * ratio);
     r.ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    drawRing(r);
+    animateRing(r);
   };
 
-  // An eight-pointed star (two overlapping squares) inside a ring, turning slowly.
-  const drawStar = (ctx, cx, cy, R, t) => {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(reduced.matches ? 0 : t * 0.1);
-    const star = new Path2D();
-    for (let k = 0; k < 8; k += 1) {
-      const outer = (k * Math.PI) / 4;
-      const inner = outer + Math.PI / 8;
-      const ri = R * Math.cos(Math.PI / 4) / Math.cos(Math.PI / 8);
-      if (k === 0) star.moveTo(R * Math.cos(outer), R * Math.sin(outer));
-      else star.lineTo(R * Math.cos(outer), R * Math.sin(outer));
-      star.lineTo(ri * Math.cos(inner), ri * Math.sin(inner));
-    }
-    star.closePath();
-    ctx.fillStyle = rgba(colors.accent, 0.1);
-    ctx.fill(star);
-    ctx.strokeStyle = rgba(colors.accent, 0.85);
-    ctx.lineWidth = 1.4;
-    ctx.stroke(star);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = rgba(colors.accent, 0.5);
-    [0, Math.PI / 4].forEach((offset) => {
-      ctx.beginPath();
-      for (let k = 0; k < 4; k += 1) {
-        const a = offset + (k * Math.PI) / 2;
-        if (k === 0) ctx.moveTo(R * 0.62 * Math.cos(a), R * 0.62 * Math.sin(a));
-        else ctx.lineTo(R * 0.62 * Math.cos(a), R * 0.62 * Math.sin(a));
-      }
-      ctx.closePath();
-      ctx.stroke();
-    });
-    ctx.beginPath();
-    ctx.arc(0, 0, R * 0.22, 0, TAU);
-    ctx.fillStyle = rgba(colors.accent, 0.9);
-    ctx.fill();
-    ctx.restore();
-  };
-
-  const ringAngle = (r, k, i, n) => (k % 2 ? -1 : 1) * r.angle + (TAU * i) / n + k * RING_PHASE;
-
-  const drawRing = (r, t) => {
+  // The rings (their far halves fainter) and the lists' labels.
+  const drawRing = (r) => {
     const ctx = r.ctx;
     ctx.clearRect(0, 0, r.w, r.h);
     if (r.mode !== "ring") return;
@@ -509,7 +517,6 @@
     ctx.font = `500 11px "Geist Mono", ui-monospace, monospace`;
     r.groups.forEach((g, k) => {
       const [rx, ry] = r.radii[k];
-      // The ring: its far half fainter than its near half.
       ctx.lineWidth = 1;
       ctx.strokeStyle = rgba(colors.accent, 0.22);
       ctx.beginPath();
@@ -520,143 +527,201 @@
       ctx.beginPath();
       ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI);
       ctx.stroke();
-      // Light running round the ring.
-      if (!reduced.matches) {
-        for (let j = 0; j < 10; j += 1) {
-          const a = (k % 2 ? -1 : 1) * (t * 0.5) - j * 0.03;
-          ctx.fillStyle = rgba(colors.accent, (1 - j / 10) * (0.45 + 0.4 * (Math.sin(a) + 1) / 2));
-          ctx.beginPath();
-          ctx.arc(cx + rx * Math.cos(a), cy + ry * Math.sin(a), 2.4 - j * 0.18, 0, TAU);
-          ctx.fill();
-        }
-      }
       if (g.label) {
         ctx.fillStyle = rgba(colors.accent, 1);
         ctx.textAlign = "right";
         ctx.fillText(g.label, cx - rx - 12, cy + 4);
       }
-      const n = g.items.length;
-      g.items.forEach((el, i) => {
-        const theta = ringAngle(r, k, i, n);
-        const x = cx + rx * Math.cos(theta);
-        const y = cy + ry * Math.sin(theta);
-        const depth = (Math.sin(theta) + 1) / 2;
-        // Spokes from the star to the near items.
-        if (depth > 0.45) {
-          ctx.strokeStyle = rgba(colors.accent, 0.22 * (depth - 0.45) / 0.55);
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-        }
-        const [w, h] = g.sizes[i];
-        const scale = r.chips ? 0.88 + 0.12 * depth : 0.8 + 0.2 * depth;
-        el.style.transform = `translate3d(${(x - w / 2).toFixed(1)}px, ${(y - h / 2).toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-        el.style.zIndex = String(10 + Math.round(depth * 40));
-      });
     });
-    drawStar(ctx, cx, cy, r.chips ? 24 : 42, t);
   };
 
-  const advanceRing = (r, dt) => {
-    if (r.mode !== "ring") return;
-    if (r.target !== null) {
-      // Turn the shortest way to bring the focused item to the front.
-      let diff = (r.target - r.angle) % TAU;
-      if (diff > Math.PI) diff -= TAU;
-      if (diff < -Math.PI) diff += TAU;
-      r.angle += diff * Math.min(1, dt * 4);
-      return;
+  // An eight-pointed star (two overlapping squares) in a ring of its own, turning slowly (CSS).
+  const starSvg = (R) => {
+    const ri = (R * Math.cos(Math.PI / 4)) / Math.cos(Math.PI / 8);
+    const pt = (rr, a) => `${(rr * Math.cos(a)).toFixed(2)},${(rr * Math.sin(a)).toFixed(2)}`;
+    const star = [];
+    for (let k = 0; k < 8; k += 1) {
+      const outer = (k * Math.PI) / 4;
+      star.push(pt(R, outer), pt(ri, outer + Math.PI / 8));
     }
-    r.speed += ((r.hold ? 0 : 1) - r.speed) * Math.min(1, dt * 3);
-    r.angle += ringSpeed(r) * r.speed * dt;
+    const square = (offset) => [0, 1, 2, 3].map((k) => pt(R * 0.62, offset + (k * Math.PI) / 2)).join(" ");
+    const box = R + 2;
+    return `<svg viewBox="${-box} ${-box} ${2 * box} ${2 * box}" width="${2 * box}" height="${2 * box}"><polygon points="${star.join(" ")}" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-opacity="0.85" stroke-width="1.4" stroke-linejoin="round"/><polygon points="${square(0)}" fill="none" stroke="currentColor" stroke-opacity="0.5"/><polygon points="${square(Math.PI / 4)}" fill="none" stroke="currentColor" stroke-opacity="0.5"/><circle r="${(R * 0.22).toFixed(2)}" fill="currentColor" fill-opacity="0.9"/></svg>`;
+  };
+
+  const animateRing = (r) => {
+    r.fx.textContent = "";
+    replaceAnimations(r, () => {
+      r.turning = [];
+      if (r.mode !== "ring") return;
+      const still = reduced.matches;
+      const cx = r.w / 2;
+      const cy = r.h / 2;
+      const R = r.chips ? 24 : 42;
+      const star = document.createElement("span");
+      star.className = "cv-star";
+      star.style.transform = `translate3d(${(cx - R - 2).toFixed(1)}px, ${(cy - R - 2).toFixed(1)}px, 100px)`;
+      star.innerHTML = starSvg(R);
+      r.fx.appendChild(star);
+      r.groups.forEach((g, k) => {
+        const [rx, ry] = r.radii[k];
+        const sign = ringSign(k);
+        const period = turnPeriod(r);
+        const at = (theta) => [cx + rx * Math.cos(theta), cy + ry * Math.sin(theta), depthAt(theta)];
+        // One revolution, from angle 0 in the ring's direction, every 5 degrees.
+        const thetas = Array.from({ length: 73 }, (_, m) => (sign * TAU * m) / 72);
+        // Spokes from the star to the nearer items: one angle-continuous revolution.
+        let last = null;
+        const spokeFrames = thetas.map((theta, m) => {
+          const [x, y, depth] = at(theta);
+          let angle = Math.atan2(y - cy, x - cx);
+          if (last !== null) angle += TAU * Math.round((last - angle) / TAU);
+          last = angle;
+          return { offset: m / 72, transform: `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, -300px) rotate(${angle.toFixed(4)}rad) scaleX(${Math.hypot(x - cx, y - cy).toFixed(1)})`, opacity: depth > 0.45 ? (0.22 * (depth - 0.45)) / 0.55 : 0 };
+        });
+        g.items.forEach((el, i) => {
+          const [w, h] = g.sizes[i];
+          const frames = thetas.map((theta, m) => {
+            const [x, y, depth] = at(theta);
+            const scale = r.chips ? 0.88 + 0.12 * depth : 0.8 + 0.2 * depth;
+            return { offset: m / 72, transform: `translate3d(${(x - w / 2).toFixed(1)}px, ${(y - h / 2).toFixed(1)}px, ${(depth * 200).toFixed(1)}px) scale(${scale.toFixed(3)})` };
+          });
+          const spoke = document.createElement("span");
+          spoke.className = "cv-spoke";
+          r.fx.appendChild(spoke);
+          const angle = startAngle(r, k, i, g.items.length);
+          if (still) {
+            const m = Math.round(startOf(angle, sign) * 72);
+            el.style.transform = frames[m].transform;
+            spoke.style.transform = spokeFrames[m].transform;
+            spoke.style.opacity = String(spokeFrames[m].opacity);
+            return;
+          }
+          const timing = { duration: period, iterations: Infinity, delay: delayFor(angle, sign, period) };
+          r.turning.push(el.animate(frames, timing), spoke.animate(spokeFrames, timing));
+        });
+        if (still) return;
+        // Light running round the ring, with a fading trail.
+        const lightFrames = thetas.map((theta, m) => {
+          const [x, y, depth] = at(theta);
+          return { offset: m / 72, transform: `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${(depth * 200 - 2).toFixed(1)}px)`, opacity: 0.45 + 0.4 * depth };
+        });
+        for (let j = 0; j < 10; j += 1) {
+          const dot = sized("cv-light", 2.4 - j * 0.18);
+          dot.style.background = rgba(colors.accent, 1 - j / 10);
+          r.fx.appendChild(dot);
+          r.anims.push(dot.animate(lightFrames, { duration: RING_LIGHT_PERIOD, iterations: Infinity, delay: delayFor(-j * 0.03, sign, RING_LIGHT_PERIOD) }));
+        }
+      });
+      r.anims.push(...r.turning);
+      r.turning.forEach((a) => {
+        a.playbackRate = r.rate;
+      });
+    });
+  };
+
+  // Ease a ring's turning to a stop (rate 0) or back to its pace (rate 1).
+  const easeRing = (r, to) => {
+    r.rateTo = to;
+    if (r.easing) return;
+    r.easing = true;
+    const step = () => {
+      r.rate += (r.rateTo - r.rate) * 0.2;
+      if (Math.abs(r.rateTo - r.rate) < 0.02) r.rate = r.rateTo;
+      r.turning.forEach((a) => {
+        a.playbackRate = r.rate;
+      });
+      if (r.rate !== r.rateTo) window.requestAnimationFrame(step);
+      else r.easing = false;
+    };
+    window.requestAnimationFrame(step);
+  };
+  // Turn a ring so that item i of group k comes to the front (angle pi / 2), the shorter way round.
+  const bringToFront = (r, k, i) => {
+    const anim = r.turning[2 * r.groups.slice(0, k).reduce((sum, g) => sum + g.items.length, 0) + 2 * i];
+    if (!anim) return;
+    const sign = ringSign(k);
+    const period = turnPeriod(r);
+    const progress = anim.effect.getComputedTiming().progress || 0;
+    let diff = (Math.PI / 2 - sign * TAU * progress) % TAU;
+    if (diff > Math.PI) diff -= TAU;
+    if (diff < -Math.PI) diff += TAU;
+    const shift = ((sign * diff) / TAU) * period;
+    // A revolution later is the same place, so turning back never takes the clock below zero.
+    const from = r.turning.map((a) => a.currentTime + (shift < 0 ? period : 0));
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = smooth(Math.min(1, (now - t0) / 600));
+      r.turning.forEach((a, n) => {
+        a.currentTime = from[n] + shift * u;
+      });
+      if (u < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
   };
   rings.forEach((r) => {
     r.container.addEventListener("pointerenter", () => {
       r.hold = true;
+      easeRing(r, 0);
     });
     r.container.addEventListener("pointerleave", () => {
       r.hold = false;
+      if (!r.focused) easeRing(r, 1);
     });
     r.groups.forEach((g, k) => {
       g.items.forEach((el, i) => {
         el.addEventListener("focusin", () => {
-          if (r.mode !== "ring") return;
-          // theta = pi / 2 is the front of the ring.
-          const sign = k % 2 ? -1 : 1;
-          r.target = sign * (Math.PI / 2 - (TAU * i) / g.items.length - k * RING_PHASE);
+          if (r.mode !== "ring" || reduced.matches) return;
+          r.focused = true;
+          r.rate = 0;
+          r.rateTo = 0;
+          r.turning.forEach((a) => {
+            a.playbackRate = 0;
+          });
+          bringToFront(r, k, i);
         });
         el.addEventListener("focusout", () => {
-          r.target = null;
+          r.focused = false;
+          if (!r.hold) easeRing(r, 1);
         });
       });
     });
   });
 
-  /* ---------- One clock for the timelines and the rings ---------- */
-  let animTime = 0;
-  let animLast = null;
-  let animFrame = null;
+  /* ---------- Running: only scenes on screen, and not while a card is open ---------- */
   let cvPaused = false;
   const visibleScenes = new Set();
-  const drawAll = () => {
-    orbits.forEach((o) => drawOrbit(o, animTime));
-    rings.forEach((r) => drawRing(r, animTime));
-  };
-  const animTick = (stamp) => {
-    const dt = animLast === null ? 0 : Math.min((stamp - animLast) / 1000, 0.1);
-    animLast = stamp;
-    if (!cvPaused) {
-      animTime += dt;
-      orbits.forEach((o) => {
-        // Ease the pointer so the parallax glides.
-        o.pointer[0] += (o.aim[0] - o.pointer[0]) * Math.min(1, dt * 4);
-        o.pointer[1] += (o.aim[1] - o.pointer[1]) * Math.min(1, dt * 4);
-        if (visibleScenes.has(o.container)) drawOrbit(o, animTime);
+  const run = () => {
+    [...orbits, ...rings].forEach((scene) => {
+      const on = !cvPaused && visibleScenes.has(scene.container);
+      scene.anims.forEach((a) => {
+        if (on && a.playState === "paused") a.play();
+        else if (!on && a.playState === "running") a.pause();
       });
-      rings.forEach((r) => {
-        if (!visibleScenes.has(r.container)) return;
-        advanceRing(r, dt);
-        drawRing(r, animTime);
-      });
-    }
-    animFrame = window.requestAnimationFrame(animTick);
+    });
   };
-  const animSync = () => {
-    if (animFrame !== null) window.cancelAnimationFrame(animFrame);
-    animFrame = null;
-    animLast = null;
-    if (!reduced.matches && !document.hidden && visibleScenes.size) animFrame = window.requestAnimationFrame(animTick);
-    else drawAll();
+  const setPaused = (paused) => {
+    cvPaused = paused;
+    run();
   };
-  const relayout = () => {
+  const relayout = (force) => {
     colors = palette();
-    orbits.forEach((o) => layoutOrbit(o));
-    rings.forEach((r) => layoutRing(r));
-    drawAll();
+    orbits.forEach((o) => layoutOrbit(o, force === true));
+    rings.forEach((r) => layoutRing(r, force === true));
+    run();
   };
   orbits.forEach((o) => {
     o.slots.forEach((slot, i) => {
-      slot.addEventListener("pointerenter", () => {
-        o.hover = i;
-      });
-      slot.addEventListener("pointerleave", () => {
-        if (o.hover === i) o.hover = -1;
-      });
-      slot.addEventListener("focusin", () => {
-        o.hover = i;
-      });
-      slot.addEventListener("focusout", () => {
-        if (o.hover === i) o.hover = -1;
-      });
-    });
-    o.container.addEventListener("pointermove", (event) => {
-      const box = o.container.getBoundingClientRect();
-      o.aim = [((event.clientX - box.left) / box.width - 0.5) * 2, ((event.clientY - box.top) / box.height - 0.5) * 2];
-    });
-    o.container.addEventListener("pointerleave", () => {
-      o.aim = [0, 0];
+      const hover = (on) => {
+        if (on) o.hover = i;
+        else if (o.hover === i) o.hover = -1;
+        slot.classList.toggle("is-hot", o.hover === i);
+        if (o.mode === "orbit") drawOrbit(o);
+      };
+      slot.addEventListener("pointerenter", () => hover(true));
+      slot.addEventListener("pointerleave", () => hover(false));
+      slot.addEventListener("focusin", () => hover(true));
+      slot.addEventListener("focusout", () => hover(false));
     });
   });
   const sceneContainers = [...orbits.map((o) => o.container), ...rings.map((r) => r.container)];
@@ -666,23 +731,30 @@
         if (entry.isIntersecting) visibleScenes.add(entry.target);
         else visibleScenes.delete(entry.target);
       });
-      animSync();
+      run();
     });
     sceneContainers.forEach((c) => watcher.observe(c));
+    // Sections off screen hold their CSS animations (floating cards, pulses, stars) still too.
+    const sectionWatcher = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => entry.target.classList.toggle("is-offscreen", !entry.isIntersecting));
+    }, { rootMargin: "200px 0px" });
+    sections.forEach((section) => sectionWatcher.observe(section));
   } else {
     sceneContainers.forEach((c) => visibleScenes.add(c));
   }
-  relayout();
-  animSync();
-  window.addEventListener("resize", relayout);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
-  // Figures change card heights when they load.
-  root.querySelectorAll(".cv-figure img").forEach((img) => img.addEventListener("load", relayout, { once: true }));
-  document.addEventListener("visibilitychange", animSync);
-  document.addEventListener("motifs:palette", () => {
-    colors = palette();
-    drawAll();
+  relayout(true);
+  window.addEventListener("resize", () => relayout());
+  // Text metrics can change once the fonts are in.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => relayout(true));
+  // A figure that loads can change its card's height (its timeline checks).
+  orbits.forEach((o) => {
+    o.list.querySelectorAll(".cv-figure img").forEach((img) => img.addEventListener("load", () => {
+      layoutOrbit(o);
+      run();
+    }, { once: true }));
   });
+  document.addEventListener("motifs:palette", () => relayout(true));
+  if (reduced.addEventListener) reduced.addEventListener("change", () => relayout(true));
 
   /* ---------- Filters and search ---------- */
   const toolbar = root.querySelector("[data-cv-toolbar]");
@@ -834,7 +906,7 @@
 
   const show = (card) => {
     if (busy) return;
-    cvPaused = true;
+    setPaused(true);
     current = card;
     fill(card);
     focus.showModal();
@@ -867,7 +939,7 @@
         if (button) button.focus({ preventScroll: true });
       }
       busy = false;
-      cvPaused = false;
+      setPaused(false);
     };
     focus.classList.remove("is-open");
     if (reduced.matches || !card) {
