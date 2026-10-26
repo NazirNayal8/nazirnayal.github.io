@@ -9,8 +9,8 @@
  * faint over the central column, where the page's own animations are.
  *
  * Words: now and then, in a side margin, a faint flock (threads, birds, light or water) drifting up
- * or down the page settles into a small phrase in Arabic calligraphy (Thuluth, Diwani or square
- * Kufi, chosen at random among the styles that render that phrase correctly). The phrase keeps
+ * or down the page settles into a small phrase in Arabic calligraphy (Gulzar, a decorative Nastaliq;
+ * the Basmala as a composed calligraphic Basmala where the margin is wide enough). The phrase keeps
  * drifting with the current, then loosens back into the flock, which carries on off the page.
  *
  * With reduced motion one still frame of the mosaic is drawn. A footer button pauses everything, and
@@ -18,7 +18,8 @@
 (() => {
   "use strict";
 
-  const SCRIPT_URL = document.currentScript ? document.currentScript.src : window.location.href;
+  // Composed drawings are in assets/img/calligraphy, beside this script's folder.
+  const ART_BASE = new URL("../img/calligraphy/", document.currentScript ? document.currentScript.src : window.location.href);
   const lib = window.ResearchMotifs;
   if (!lib || !document.body) return;
   const { palette, rgba, clamp, smooth } = lib;
@@ -286,52 +287,75 @@
   };
 
   /* ---------- Words: small calligraphy carried along the side margins ---------- */
-  const THULUTH = "Layla Thuluth";
-  const DIWANI = "Layla Diwani";
-  const KUFAM = "Kufam";
-  // Each phrase with full tashkeel (as in the Quranic text where it is a verse), its plain form for
-  // square Kufi (which carries no tashkeel), and the styles that render it correctly. LaylaDiwani
-  // drops the hamza on أ, so phrases with أ are not set in it.
+  // Styles. Gulzar (a decorative Nastaliq, SIL OFL) sets every phrase. The Basmala is drawn as Amiri's
+  // composed calligraphic Basmala (the one character ﷽, SIL OFL) where the margin is wide enough for
+  // its long sweep (minInk), and in Gulzar elsewhere. Both come from Google Fonts, Amiri cut down to
+  // that one character.
+  const STYLES = {
+    gulzar: { family: "Gulzar", css: "family=Gulzar&display=swap", sample: "سلام" },
+    basmala: { family: "Amiri", css: `family=Amiri&display=swap&text=${encodeURIComponent("\uFDFD")}`, sample: "\uFDFD", minInk: 30 },
+  };
+  // Each phrase with full tashkeel (as in the Quranic text where it is a verse), and where it has one,
+  // a composed form; styles are tried in order. A phrase can also carry art: composed calligraphic
+  // drawings (one colour on a transparent or white ground, in assets/img/calligraphy), one chosen at
+  // random each time, drawn with style "art" where the margin is wide enough. Their sources and
+  // licences are on the Credits page (_pages/credits.md).
   const PHRASES = [
-    { text: "اقْرَأْ", plain: "اقرأ", styles: ["thuluth", "kufi"] },
-    { text: "عَيْنَ الْيَقِينِ", plain: "عين اليقين", styles: ["thuluth", "diwani", "kufi"] },
-    { text: "سَلَامٌ", plain: "سلام", styles: ["thuluth", "diwani", "kufi"] },
-    { text: "وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا", styles: ["thuluth", "diwani"] },
-    { text: "خَيْرٌ", plain: "خير", styles: ["thuluth", "diwani", "kufi"] },
-    { text: "قَرَارٌ", plain: "قرار", styles: ["thuluth", "diwani", "kufi"] },
-    { text: "رَبِّ زِدْنِي عِلْمًا", styles: ["thuluth", "diwani"] },
-    { text: "مَا لِيَ لَا أَرَى الْهُدْهُدَ", styles: ["thuluth"] },
+    { text: "اقْرَأْ" },
+    { text: "عَيْنَ الْيَقِينِ" },
+    { text: "سَلَامٌ" },
+    { text: "وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا" },
+    { text: "خَيْرٌ" },
+    { text: "قَرَارٌ" },
+    { text: "رَبِّ زِدْنِي عِلْمًا" },
+    { text: "مَا لِيَ لَا أَرَى الْهُدْهُدَ" },
+    { text: "أَمْ خُلِقُوا مِنْ غَيْرِ شَيْءٍ أَمْ هُمُ الْخَالِقُونَ" },
+    {
+      text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+      art: ["basmala-warraich-12.webp", "basmala-warraich-9.webp", "basmala-azzi.webp"],
+      composed: "\uFDFD",
+      styles: ["art", "basmala", "gulzar"],
+    },
+    { text: "السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ" },
+    { text: "إِنَّ مَعَ الْعُسْرِ يُسْرًا" },
+    { text: "إِن يَتَّبِعُونَ إِلَّا الظَّنَّ وَإِنْ هُمْ إِلَّا يَخْرُصُونَ" },
+    { text: "الْعُرْوَةُ الْوُثْقَى", art: ["urwa-wuthqa.webp"], styles: ["art", "gulzar"] },
+    { text: "قُلْ هُوَ اللَّهُ أَحَدٌ", art: ["ikhlas.webp"], styles: ["art", "gulzar"] },
+    { text: "وَهُوَ بِكُلِّ شَيْءٍ عَلِيمٌ", art: ["hadid-57-3.webp"], styles: ["art", "gulzar"] },
+    { text: "الْقُرْآنُ الْكَرِيمُ", art: ["quran-kareem.webp"], styles: ["art", "gulzar"] },
   ];
+  // A preview can show a drawing with window.AMBIENT_ART = its path (it becomes the last phrase).
+  if (typeof window.AMBIENT_ART === "string") PHRASES.push({ text: "", art: [window.AMBIENT_ART], styles: ["art"] });
+  const stylesOf = (phrase) => phrase.styles || ["gulzar"];
+  const ready = (phrase, style) => (style === "art" ? Boolean(phrase.artImages && phrase.artImages.length) : fontsReady[style]);
   const MODES = ["threads", "birds", "light", "water"];
-  const fontsReady = { thuluth: false, diwani: false, kufi: false };
+  const fontsReady = { gulzar: false, basmala: false };
   let fontsRequested = false;
   // Words appear only where the side margins are wide enough, so fonts load only there.
   const marginsFit = () => !narrow.matches && (window.innerWidth - Math.min(window.innerWidth, 1120)) / 2 + 12 >= 64;
   const loadFonts = () => {
     if (fontsRequested || reduced.matches || !marginsFit()) return;
     fontsRequested = true;
-    // Thuluth and Diwani: the Layla fonts (SIL OFL), served unmodified from this site.
-    if (window.FontFace) {
-      const base = new URL("../fonts/layla/", SCRIPT_URL);
-      [["thuluth", THULUTH, "LaylaThuluth.ttf"], ["diwani", DIWANI, "LaylaDiwani.ttf"]].forEach(([key, family, file]) => {
-        const face = new FontFace(family, `url(${new URL(file, base).href})`);
-        face.load().then((loaded) => {
-          document.fonts.add(loaded);
-          fontsReady[key] = true;
+    Object.entries(STYLES).forEach(([key, style]) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?${style.css}`;
+      link.addEventListener("load", () => {
+        if (!document.fonts || !document.fonts.load) return;
+        document.fonts.load(`100px "${style.family}"`, style.sample).then((faces) => {
+          fontsReady[key] = faces.length > 0;
         }, () => {});
       });
-    }
-    // Square Kufi: bricks laid on Kufam's letterforms (Google Fonts, only the letters used).
-    const chars = Array.from(new Set(PHRASES.filter((p) => p.plain).map((p) => p.plain).join("").replace(/\s/g, "").split(""))).join("");
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = `https://fonts.googleapis.com/css2?family=Kufam:wght@600&display=swap&text=${encodeURIComponent(chars)}`;
-    document.head.appendChild(link);
-    link.addEventListener("load", () => {
-      if (!document.fonts || !document.fonts.load) return;
-      document.fonts.load(`600 100px "${KUFAM}"`, "سلام").then((faces) => {
-        fontsReady.kufi = faces.length > 0;
-      }, () => {});
+      document.head.appendChild(link);
+    });
+    // Composed drawings, loaded with the fonts.
+    PHRASES.filter((phrase) => phrase.art).forEach((phrase) => {
+      phrase.artImages = [];
+      phrase.art.forEach((file) => {
+        const img = new Image();
+        img.addEventListener("load", () => phrase.artImages.push(img));
+        img.src = new URL(file, ART_BASE).href;
+      });
     });
   };
 
@@ -350,10 +374,14 @@
     return bag.pop();
   };
 
-  // Draw text centred on a canvas and return its ink box.
+  // Draw text centred on a canvas and return its ink box. The canvas is sized from the measured text,
+  // with room around it (Nastaliq cascades tall; the composed Basmala is very wide).
+  const sizer = document.createElement("canvas").getContext("2d");
   const inkOf = (text, font, size) => {
-    const w = Math.ceil(size * (text.length * 0.9 + 4));
-    const h = Math.ceil(size * 3);
+    sizer.font = font(size);
+    const m = sizer.measureText(text);
+    const w = Math.ceil(Math.max(m.width, (m.actualBoundingBoxLeft || 0) + (m.actualBoundingBoxRight || 0)) + size * 4);
+    const h = Math.ceil(size * 4);
     const c = document.createElement("canvas");
     c.width = w;
     c.height = h;
@@ -382,7 +410,7 @@
     return x1 < 0 ? null : { canvas: c, data, w, h, x0, y0, x1, y1 };
   };
 
-  const fontOf = (style) => (style === "kufi" ? (px) => `600 ${px}px "${KUFAM}"` : (px) => `400 ${px}px "${style === "diwani" ? DIWANI : THULUTH}"`);
+  const fontOf = (style) => (px) => `400 ${px}px "${STYLES[style].family}"`;
 
   // Ink boxes measured at 60px, cached: line breaking measures the same words repeatedly.
   const measured = new Map();
@@ -395,7 +423,7 @@
     return measured.get(key);
   };
 
-  // Break a phrase at spaces into at most three lines, choosing the largest ink height that fits
+  // Break a phrase at spaces into at most four lines, choosing the largest ink height that fits
   // maxW (an extra line costs a little, so short phrases stay on one line).
   const layout = (text, style, inkH, maxW) => {
     const full = measure(text, style);
@@ -413,7 +441,7 @@
         } else line.push(words[k]);
       }
       lines.push(line.join(" "));
-      if (lines.length > 3) continue;
+      if (lines.length > 4) continue;
       const widest = Math.max(...lines.map((l) => (measure(l, style) || { w: Infinity }).w)) * unit;
       const fit = inkH * Math.min(1, maxW / widest);
       const score = fit * Math.pow(0.85, lines.length - 1);
@@ -445,60 +473,51 @@
     return { image, w, h, points };
   };
 
-  // One line of square Kufi (banna'i): the letters laid on a grid of square bricks. Every line
-  // shares the phrase's grid (frame), so the bricks line up from line to line.
-  const kufiLine = (line, frame, brick) => {
-    const big = inkOf(line, fontOf("kufi"), 180);
-    if (!big) return null;
-    const rows = 11;
-    const cell = (frame.y1 - frame.y0 + 1) / rows;
-    const cols = Math.ceil((big.x1 - big.x0 + 1) / cell);
+  // A composed drawing, sized to the margin (at most 240px wide and 42% of the window's height), its
+  // ink taken from its dark or coloured pixels so that any single colour works; null if it would be
+  // narrower than 90px.
+  const renderArt = (img, maxW) => {
+    const aspect = (img.naturalHeight || 300) / (img.naturalWidth || 300);
+    const w = Math.round(Math.min(maxW, 240, (height * 0.42) / aspect));
+    const h = Math.round(w * aspect);
+    if (w < 90) return null;
     const image = document.createElement("canvas");
-    image.width = Math.ceil(cols * brick) + 2;
-    image.height = Math.ceil(rows * brick) + 2;
-    const ictx = image.getContext("2d");
-    ictx.fillStyle = "#000";
+    image.width = w;
+    image.height = h;
+    const g = image.getContext("2d", { willReadFrequently: true });
+    g.drawImage(img, 0, 0, w, h);
+    const pixels = g.getImageData(0, 0, w, h);
+    const d = pixels.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const lum = (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+      const ink = (d[i + 3] / 255) * clamp((1 - lum) / 0.6, 0, 1);
+      d[i] = 0;
+      d[i + 1] = 0;
+      d[i + 2] = 0;
+      d[i + 3] = Math.round(ink * 255);
+    }
+    g.putImageData(pixels, 0, 0);
     const points = [];
-    for (let r = 0; r < rows; r += 1) {
-      for (let q = 0; q < cols; q += 1) {
-        let ink = 0;
-        for (let sy = 0; sy < 4; sy += 1) {
-          for (let sx = 0; sx < 4; sx += 1) {
-            const X = Math.floor(big.x0 + (q + (sx + 0.5) / 4) * cell);
-            const Y = Math.floor(frame.y0 + (r + (sy + 0.5) / 4) * cell);
-            if (X < big.w && Y < big.h && big.data[(Y * big.w + X) * 4 + 3] > 100) ink += 1;
-          }
-        }
-        if (ink >= 7) {
-          const gap = Math.max(0.6, brick * 0.14);
-          ictx.fillRect(1 + q * brick + gap / 2, 1 + r * brick + gap / 2, brick - gap, brick - gap);
-          points.push([1 + (q + 0.5) * brick, 1 + (r + 0.5) * brick]);
-        }
+    const step = Math.max(2, Math.round(w / 48));
+    for (let y = 0; y < h; y += step) {
+      for (let x = 0; x < w; x += step) {
+        if (d[(y * w + x) * 4 + 3] > 150) points.push([x, y]);
       }
     }
-    return { image, w: image.width, h: image.height, points };
+    while (points.length > 320) points.splice(Math.floor(Math.random() * points.length), 1);
+    return { image, w, h, points, lines: 1 };
   };
 
   // A phrase as an image, always level, plus points on its ink. Long phrases are set on stacked,
   // centred lines so they fit across maxW at a readable size; null if they would be smaller than minH.
   const renderGlyph = (phrase, style, inkH, maxW, minH) => {
-    const kufi = style === "kufi";
-    const text = kufi ? phrase.plain : phrase.text;
+    if (style === "art") return renderArt(phrase.artImages[Math.floor(Math.random() * phrase.artImages.length)], maxW);
+    const text = style === "basmala" ? phrase.composed : phrase.text;
     const plan = layout(text, style, inkH, maxW);
     if (!plan || plan.fit < minH) return null;
-    let parts;
-    let gap;
-    if (kufi) {
-      const frame = inkOf(text, fontOf("kufi"), 180);
-      if (!frame) return null;
-      const brick = plan.fit / 11;
-      parts = plan.lines.map((line) => kufiLine(line, frame, brick));
-      gap = Math.max(1, Math.round(brick));
-    } else {
-      const size = 60 * (plan.fit / measure(text, style).h);
-      parts = plan.lines.map((line) => scriptLine(line, style, size));
-      gap = Math.round(plan.fit * 0.22);
-    }
+    const size = 60 * (plan.fit / measure(text, style).h);
+    const parts = plan.lines.map((line) => scriptLine(line, style, size));
+    const gap = Math.round(plan.fit * 0.22);
     if (parts.some((p) => !p)) return null;
     const w = Math.max(...parts.map((p) => p.w));
     const h = parts.reduce((sum, p) => sum + p.h, 0) + gap * (parts.length - 1);
@@ -543,14 +562,22 @@
     const gutter = (width - column) / 2 + 12;
     if (narrow.matches || gutter < 64) return null;
     const phrase = nextPhrase();
-    const styles = phrase.styles.filter((s) => fontsReady[s]);
-    if (!styles.length) return null;
-    // A preview can request a style with window.AMBIENT_STYLE = "thuluth", "diwani" or "kufi".
-    const style = styles.includes(window.AMBIENT_STYLE) ? window.AMBIENT_STYLE : styles[Math.floor(Math.random() * styles.length)];
-    // Always written level, so it reads; long phrases break onto lines to fit across the margin.
-    const inkH = style === "kufi" ? clamp(gutter * 0.3, 36, 52) : clamp(gutter * 0.28, 28, 44);
-    const glyph = renderGlyph(phrase, style, inkH, gutter - 36, style === "kufi" ? 28 : 22);
-    if (!glyph || !glyph.points.length) return null;
+    const styles = stylesOf(phrase).filter((s) => ready(phrase, s));
+    // A preview can request a style with window.AMBIENT_STYLE = "gulzar", "basmala" or "art".
+    const order = styles.includes(window.AMBIENT_STYLE) ? [window.AMBIENT_STYLE] : styles;
+    // Always written level, so it reads; long phrases break onto lines to fit across the margin. The
+    // first style that fits is used.
+    const inkH = clamp(gutter * 0.28, 28, 44);
+    let style = null;
+    let glyph = null;
+    for (const s of order) {
+      glyph = renderGlyph(phrase, s, inkH, gutter - 36, (STYLES[s] && STYLES[s].minInk) || 22);
+      if (glyph && glyph.points.length) {
+        style = s;
+        break;
+      }
+    }
+    if (!style) return null;
     const along = glyph.h;
     if (along > height * 0.5) return null;
     lastSide = -lastSide;
