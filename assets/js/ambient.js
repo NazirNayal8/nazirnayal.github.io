@@ -32,11 +32,12 @@
   const gauss = () => Math.sqrt(-2 * Math.log(Math.random() || 1e-6)) * Math.cos(TAU * Math.random());
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  // Layers. The mosaic changes slowly, so it is redrawn only now and then, on whichever of two canvases
-  // is hidden, which then replaces the other in the same frame (drawings a moment apart differ too
-  // little to see); in between, a CSS transform carries the scroll parallax (off the main thread). Each
-  // mosaic canvas overhangs the window by MARGIN on every side, so the transform never uncovers an
-  // edge. The words layer is drawn only while a phrase is on screen.
+  // Layers. The mosaic is drawn on the GPU where WebGL is available (see "Mosaic on the GPU"). Elsewhere
+  // it changes slowly enough to be redrawn only now and then, on whichever of two 2D canvases is
+  // hidden, which then replaces the other in the same frame (drawings a moment apart differ too little
+  // to see); in between, a CSS transform carries the scroll parallax. Those canvases overhang the
+  // window by MARGIN on every side, so the transform never uncovers an edge. The words layer is drawn
+  // only while a phrase is on screen. The layers are made at the end, once the designs are known.
   const MARGIN = 48;
   const layer = (className) => {
     const c = document.createElement("canvas");
@@ -44,17 +45,14 @@
     c.setAttribute("aria-hidden", "true");
     return c;
   };
-  const mosaics = [0, 1].map(() => {
-    const c = layer("ambient ambient-mosaic");
-    return { c, g: c.getContext("2d"), at: 0, ox: 0, oy: 0 };
-  });
+  let mosaics = [];
   const wordsCanvas = layer("ambient ambient-words");
-  document.body.prepend(mosaics[0].c, mosaics[1].c, wordsCanvas);
   const wctx = wordsCanvas.getContext("2d");
-  // The first mosaic canvas carries the state for previews and tests (data-design, -phase, -word).
-  const canvas = mosaics[0].c;
+  // The mosaic canvas (the first, in 2D) carries the state for previews and tests (data-design,
+  // -phase, -word).
+  let canvas = null;
   let front = 0;
-  let mctx = mosaics[0].g;
+  let mctx = null;
 
   let width = 0;
   let height = 0;
@@ -134,6 +132,8 @@
   const design = DESIGNS[forced >= 0 ? forced % DESIGNS.length : Math.floor(Math.random() * DESIGNS.length)];
   const rotation = [0, 15, 30, 45][Math.floor(Math.random() * 4)] * DEG;
   const sizeJitter = 0.9 + Math.random() * 0.3;
+  // A slow drift, in CSS pixels per second (drawn on the GPU; the fallback mosaic stays still).
+  const drift = [2.6 + Math.random() * 1.6, 1.2 + Math.random() * 1.4].map((v) => v * (Math.random() < 0.5 ? -1 : 1));
   let edge = design.edge;
 
   // Hankin's rays for one tile at contact angle theta (from each edge midpoint, towards each corner).
@@ -285,6 +285,204 @@
     g.globalCompositeOperation = "source-over";
   };
 
+  /* ---------- Mosaic on the GPU ---------- */
+  // Where WebGL is available the mosaic is drawn afresh on every frame by a shader: each pixel finds
+  // its nearest Hankin line and takes its coverage from the exact distance, so the lines stay equally
+  // sharp at any sub-pixel position and the slow drift is smooth (no shimmer, no pixel steps), while
+  // the main thread only sets a few numbers per frame. Every tile is a regular polygon, so a pixel is
+  // folded into one sector of it (between an edge's midpoint and a corner), where the pattern is a
+  // single segment: from the midpoint, along the ray at the contact angle, to where it meets the ray
+  // from the next edge on the line to the corner.
+  const VERTEX = "attribute vec2 a_pos; void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }";
+  const FRAGMENT = `
+precision highp float;
+uniform vec2 u_res;
+uniform float u_dpr;
+uniform vec2 u_origin;
+uniform float u_scale;
+uniform vec2 u_rot;
+uniform vec2 u_a;
+uniform vec2 u_b;
+uniform mat2 u_inv;
+uniform float u_time;
+uniform vec2 u_theta;
+uniform vec4 u_poly[3];
+uniform vec3 u_shape[3];
+uniform int u_count;
+uniform vec3 u_width;
+uniform vec3 u_color;
+uniform float u_strength;
+uniform vec4 u_quiet;
+// Distance in CSS px from q (relative to a tile's centre; ij is the tile's cell) to the nearest of
+// the tile's rays, folded into one half sector.
+float lineDistance(vec2 q, vec2 ij, vec4 poly, vec3 shape) {
+  float hs = 0.5 * poly.w;
+  float beta = abs(mod(atan(q.y, q.x) - shape.x, poly.w) - hs);
+  float wave = sin(0.5 * ij.x + 0.33 * ij.y - 0.1 * u_time) * cos(0.29 * ij.x - 0.41 * ij.y + 0.07 * u_time);
+  float th = mix(u_theta.x, u_theta.y, 0.5 + 0.5 * wave);
+  vec2 dir = vec2(-sin(th), cos(th));
+  vec2 mx = (poly.z / (dir.y * shape.y - dir.x)) * dir;
+  vec2 mf = length(q) * vec2(cos(beta), sin(beta)) - vec2(poly.z, 0.0);
+  float h = clamp(dot(mf, mx) / dot(mx, mx), 0.0, 1.0);
+  return length(mf - mx * h) * u_scale;
+}
+void main() {
+  vec2 css = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y) / u_dpr;
+  vec2 d = css - u_origin;
+  vec2 p = vec2(u_rot.x * d.x + u_rot.y * d.y, -u_rot.y * d.x + u_rot.x * d.y) / u_scale;
+  float margin = (u_width.x + 1.0) / u_scale;
+  float best = 1e6;
+  vec2 nearest = vec2(0.0);
+  for (int k = 0; k < 3; k++) {
+    if (k >= u_count) break;
+    vec4 poly = u_poly[k];
+    vec3 shape = u_shape[k];
+    vec2 rel = p - poly.xy;
+    // The only centres of this tile near enough are the corners of the lattice cell the pixel is in.
+    vec2 c0 = floor(u_inv * rel);
+    for (int dj = 0; dj <= 1; dj++) {
+      for (int di = 0; di <= 1; di++) {
+        vec2 ij = c0 + vec2(float(di), float(dj));
+        vec2 q = rel - ij.x * u_a - ij.y * u_b;
+        // No line of this tile comes within reach of the pixel.
+        if (length(q) > shape.z + margin) continue;
+        float dist = lineDistance(q, ij, poly, shape);
+        if (dist < best) {
+          best = dist;
+          nearest = ij;
+        }
+      }
+    }
+  }
+  float light = 0.5 + 0.5 * sin(0.26 * nearest.x + 0.17 * nearest.y - 0.2 * u_time);
+  float px = 1.0 / u_dpr;
+  float cover = clamp((u_width.x - best) / px + 0.5, 0.0, 1.0);
+  if (u_width.z > 0.5) cover *= 1.0 - clamp((u_width.y - best) / px + 0.5, 0.0, 1.0);
+  float quiet = 0.62;
+  if (u_quiet.w < 0.5) {
+    float x = min(css.x, u_quiet.z - css.x) / u_quiet.z;
+    if (x < u_quiet.x) quiet = 0.12 * x / max(u_quiet.x, 1e-4);
+    else if (x < u_quiet.y) quiet = 0.12 + 0.68 * (x - u_quiet.x) / max(u_quiet.y - u_quiet.x, 1e-4);
+    else quiet = 0.8 + 0.08 * (x - u_quiet.y) / max(0.5 - u_quiet.y, 1e-4);
+  }
+  float alpha = u_strength * (0.4 + 0.6 * light) * cover * (1.0 - quiet);
+  gl_FragColor = vec4(u_color * alpha, alpha);
+}`;
+  // Returns the GPU mosaic ({ canvas, resize, render }), or null where WebGL is unavailable.
+  const makeGLMosaic = () => {
+    const c = layer("ambient ambient-mosaic");
+    let gl = null;
+    try {
+      gl = c.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+    } catch (e) {
+      gl = null;
+    }
+    if (!gl) return null;
+    // The lattice and tiles, in units of the tile edge; each tile's centre moved into the unit cell.
+    const [la, lb] = design.lattice;
+    const det = la[0] * lb[1] - la[1] * lb[0];
+    // Per tile: centre, apothem and sector angle; first-vertex angle, cot of the half sector, and reach.
+    const polys = [];
+    const shapes = [];
+    design.tiles.forEach((pts) => {
+      const n = pts.length;
+      const cx = pts.reduce((sum, q) => sum + q[0], 0) / n;
+      const cy = pts.reduce((sum, q) => sum + q[1], 0) / n;
+      const u = (lb[1] * cx - lb[0] * cy) / det;
+      const v = (-la[1] * cx + la[0] * cy) / det;
+      const fu = u - Math.floor(u);
+      const fv = v - Math.floor(v);
+      const hs = Math.PI / n;
+      const ap = Math.hypot(pts[0][0] - cx, pts[0][1] - cy) * Math.cos(hs);
+      // The lines reach the edge midpoints, or farther where the rays meet beyond them (at the lowest angle).
+      const lo = design.theta[0] * DEG;
+      const reach = ap * Math.max(1, Math.cos(lo) / Math.cos(lo - hs));
+      polys.push(fu * la[0] + fv * lb[0], fu * la[1] + fv * lb[1], ap, 2 * hs);
+      shapes.push(Math.atan2(pts[0][1] - cy, pts[0][0] - cx), 1 / Math.tan(hs), reach);
+    });
+    while (polys.length < 12) polys.push(0, 0, 0, 1);
+    while (shapes.length < 9) shapes.push(0, 0, 0);
+    let program = null;
+    let U = {};
+    const setup = () => {
+      const compile = (type, source) => {
+        const sh = gl.createShader(type);
+        gl.shaderSource(sh, source);
+        gl.compileShader(sh);
+        return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
+      };
+      const vs = compile(gl.VERTEX_SHADER, VERTEX);
+      const fs = compile(gl.FRAGMENT_SHADER, FRAGMENT);
+      if (!vs || !fs) return false;
+      program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+      gl.useProgram(program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const pos = gl.getAttribLocation(program, "a_pos");
+      gl.enableVertexAttribArray(pos);
+      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+      U = {};
+      ["res", "dpr", "origin", "scale", "rot", "a", "b", "inv", "time", "theta", "poly", "shape", "count", "width", "color", "strength", "quiet"].forEach((name) => {
+        U[name] = gl.getUniformLocation(program, `u_${name}`);
+      });
+      gl.uniform2f(U.a, la[0], la[1]);
+      gl.uniform2f(U.b, lb[0], lb[1]);
+      gl.uniformMatrix2fv(U.inv, false, [lb[1] / det, -la[1] / det, -lb[0] / det, la[0] / det]);
+      gl.uniform4fv(U.poly, polys);
+      gl.uniform3fv(U.shape, shapes);
+      gl.uniform1i(U.count, design.tiles.length);
+      gl.uniform2f(U.theta, design.theta[0] * DEG, design.theta[1] * DEG);
+      gl.uniform2f(U.rot, Math.cos(rotation), Math.sin(rotation));
+      return true;
+    };
+    if (!setup()) return null;
+    let lost = false;
+    c.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      lost = true;
+    });
+    c.addEventListener("webglcontextrestored", () => {
+      lost = !setup();
+    });
+    // Sized to the layout viewport (without a scrollbar), so its pixels map one to one onto the screen.
+    let ratio = 1;
+    let cssW = 0;
+    const resize = () => {
+      ratio = Math.min(window.devicePixelRatio || 1, 2);
+      cssW = document.documentElement.clientWidth || window.innerWidth;
+      const cssH = document.documentElement.clientHeight || window.innerHeight;
+      c.width = Math.round(cssW * ratio);
+      c.height = Math.round(cssH * ratio);
+      Object.assign(c.style, { width: `${c.width / ratio}px`, height: `${c.height / ratio}px`, right: "auto", bottom: "auto" });
+    };
+    const render = () => {
+      if (lost) return;
+      gl.viewport(0, 0, c.width, c.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform2f(U.res, c.width, c.height);
+      gl.uniform1f(U.dpr, ratio);
+      gl.uniform2f(U.origin, time * drift[0], time * drift[1] - (window.scrollY || 0) * 0.06);
+      gl.uniform1f(U.scale, edge);
+      gl.uniform1f(U.time, time);
+      const band = design.style === "band";
+      if (band) gl.uniform3f(U.width, narrow.matches ? 1.5 : 1.9, narrow.matches ? 0.55 : 0.75, 1);
+      else gl.uniform3f(U.width, 0.575, 0, 0);
+      gl.uniform3f(U.color, palette.accent[0] / 255, palette.accent[1] / 255, palette.accent[2] / 255);
+      gl.uniform1f(U.strength, palette.dark ? 0.24 : 0.28);
+      // The fade toward the central column, as quietCentre draws it.
+      const column = Math.min(cssW, 1120);
+      const left = (cssW - column) / 2;
+      gl.uniform4f(U.quiet, clamp((left - 40) / cssW, 0, 0.45), clamp((left + 60) / cssW, 0.01, 0.48), cssW, narrow.matches ? 1 : 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+    return { canvas: c, resize, render };
+  };
+
   /* ---------- Words: small calligraphy carried along the side margins ---------- */
   // Styles. Gulzar (a decorative Nastaliq, SIL OFL) sets every phrase. The Basmala is drawn as Amiri's
   // composed calligraphic Basmala (the one character ﷽, SIL OFL) where the margin is wide enough for
@@ -320,7 +518,6 @@
     { text: "إِن يَتَّبِعُونَ إِلَّا الظَّنَّ وَإِنْ هُمْ إِلَّا يَخْرُصُونَ" },
     { text: "الْعُرْوَةُ الْوُثْقَى", art: ["urwa-wuthqa.webp"], styles: ["art", "gulzar"] },
     { text: "قُلْ هُوَ اللَّهُ أَحَدٌ", art: ["ikhlas.webp"], styles: ["art", "gulzar"] },
-    { text: "وَهُوَ بِكُلِّ شَيْءٍ عَلِيمٌ", art: ["hadid-57-3.webp"], styles: ["art", "gulzar"] },
     { text: "الْقُرْآنُ الْكَرِيمُ", art: ["quran-kareem.webp"], styles: ["art", "gulzar"] },
   ];
   // A preview can show a drawing with window.AMBIENT_ART = its path (it becomes the last phrase).
@@ -802,8 +999,11 @@
     const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
-    mosaicRatio = gridRatio();
-    sizeMosaics();
+    if (glMosaic) glMosaic.resize();
+    else {
+      mosaicRatio = gridRatio();
+      sizeMosaics();
+    }
     wordsCanvas.width = Math.round(width * ratio);
     wordsCanvas.height = Math.round(height * ratio);
     wctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -893,12 +1093,17 @@
   };
 
   let wordsAt = -1;
+  let mosaicAt = -1;
   const tick = (now) => {
     const dt = last === null ? 0 : (now - last) / 1000;
     if (measuring && last !== null) noteCost(dt * 1000);
     last = now;
     time += Math.min(dt, 0.1);
-    placeMosaic(true);
+    if (!glMosaic) placeMosaic(true);
+    else if (time - mosaicAt >= 1 / FPS) {
+      mosaicAt = time;
+      glMosaic.render();
+    }
     if (time - wordsAt >= 1 / FPS) {
       wordsAt = time;
       drawWords();
@@ -909,7 +1114,8 @@
   // With reduced motion, when paused or in a hidden tab: one still frame, moved only by scrolling.
   const still = () => {
     clearWords();
-    placeMosaic(false);
+    if (glMosaic) glMosaic.render();
+    else placeMosaic(false);
     status();
   };
   const sync = () => {
@@ -949,14 +1155,16 @@
     clearWords();
     if (frame === null) still();
   });
-  // While still, scrolling only moves the layer (redrawn near the end of its overhang).
+  // While still, scrolling only moves the pattern by its parallax.
   let scrollQueued = false;
   window.addEventListener("scroll", () => {
     if (frame !== null || scrollQueued) return;
     scrollQueued = true;
     window.requestAnimationFrame(() => {
       scrollQueued = false;
-      if (frame === null) placeMosaic(false);
+      if (frame !== null) return;
+      if (glMosaic) glMosaic.render();
+      else placeMosaic(false);
     });
   }, { passive: true });
   document.addEventListener("visibilitychange", sync);
@@ -972,7 +1180,22 @@
     });
   }
 
+  // The mosaic's layers: one WebGL canvas, or two 2D canvases where WebGL is unavailable.
+  const glMosaic = makeGLMosaic();
+  if (glMosaic) {
+    canvas = glMosaic.canvas;
+    document.body.prepend(canvas, wordsCanvas);
+  } else {
+    mosaics = [0, 1].map(() => {
+      const c = layer("ambient ambient-mosaic");
+      return { c, g: c.getContext("2d"), at: 0, ox: 0, oy: 0 };
+    });
+    canvas = mosaics[0].c;
+    mctx = mosaics[0].g;
+    document.body.prepend(mosaics[0].c, mosaics[1].c, wordsCanvas);
+  }
   canvas.dataset.design = design.name;
+  canvas.dataset.renderer = glMosaic ? "webgl" : "2d";
   resize();
   label();
   loadFonts();
