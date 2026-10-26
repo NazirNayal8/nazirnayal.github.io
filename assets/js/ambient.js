@@ -32,9 +32,9 @@
   const gauss = () => Math.sqrt(-2 * Math.log(Math.random() || 1e-6)) * Math.cos(TAU * Math.random());
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  // Layers. The mosaic changes slowly, so it is redrawn only now and then, on one of two canvases: the
-  // new drawing fades in over the previous one, so its changes of shape look continuous, and in
-  // between a CSS transform carries the drift and the scroll parallax (off the main thread). Each
+  // Layers. The mosaic changes slowly, so it is redrawn only now and then, on whichever of two canvases
+  // is hidden, which then replaces the other in the same frame (drawings a moment apart differ too
+  // little to see); in between, a CSS transform carries the scroll parallax (off the main thread). Each
   // mosaic canvas overhangs the window by MARGIN on every side, so the transform never uncovers an
   // edge. The words layer is drawn only while a phrase is on screen.
   const MARGIN = 48;
@@ -134,7 +134,6 @@
   const design = DESIGNS[forced >= 0 ? forced % DESIGNS.length : Math.floor(Math.random() * DESIGNS.length)];
   const rotation = [0, 15, 30, 45][Math.floor(Math.random() * 4)] * DEG;
   const sizeJitter = 0.9 + Math.random() * 0.3;
-  const drift = [2.6 + Math.random() * 1.6, 1.2 + Math.random() * 1.4].map((v) => v * (Math.random() < 0.5 ? -1 : 1));
   let edge = design.edge;
 
   // Hankin's rays for one tile at contact angle theta (from each edge midpoint, towards each corner).
@@ -185,7 +184,8 @@
     }
   };
 
-  const LEVELS = 6;
+  // Brightness levels the light wave is drawn in; fine enough that no tile visibly steps.
+  const LEVELS = 24;
   const buckets = Array.from({ length: LEVELS }, () => []);
   // Draws the mosaic with the pattern's origin at (ox, oy), in CSS pixels.
   const drawMosaic = (ox, oy) => {
@@ -784,8 +784,9 @@
   };
   let mosaicRatio = gridRatio();
   const snap = (v) => Math.round(v * mosaicRatio) / mosaicRatio;
-  // Where the pattern's origin is now (its drift, and the parallax of scrolling), on the grid.
-  const anchor = () => [snap(time * drift[0]), snap(time * drift[1] - (window.scrollY || 0) * 0.06)];
+  // Where the pattern's origin is now, on the grid. It does not drift (a pixel-sharp pattern can only
+  // move in whole-pixel steps, which read as jitter); it shifts only with the parallax of scrolling.
+  const anchor = () => [0, snap(-(window.scrollY || 0) * 0.06)];
   const sizeMosaics = () => {
     mosaics.forEach((m) => {
       m.c.width = Math.round((width + 2 * MARGIN) * mosaicRatio);
@@ -815,8 +816,9 @@
   let cost = 16;
   let measuring = false;
   let dirty = true;
-  // Draw on the canvas behind and fade it in over the one in front, over `fade` milliseconds.
-  const drawMosaicLayer = (fade) => {
+  // Draw on the hidden canvas and show it in place of the other, in the same frame. (A crossfade would
+  // dim the faint lines halfway through, and restart before it finished: a visible flicker.)
+  const drawMosaicLayer = () => {
     const back = mosaics[1 - front];
     mctx = back.g;
     mctx.clearRect(-MARGIN, -MARGIN, width + 2 * MARGIN, height + 2 * MARGIN);
@@ -826,9 +828,6 @@
     back.at = time;
     back.ox = ox;
     back.oy = oy;
-    mosaics.forEach((m) => {
-      m.c.style.transition = fade ? `opacity ${fade}ms linear` : "none";
-    });
     back.c.style.opacity = "1";
     mosaics[front].c.style.opacity = "0";
     front = 1 - front;
@@ -836,7 +835,7 @@
     measuring = true;
   };
   // Each canvas moves from where its pattern was drawn to where the pattern is now (both on the grid,
-  // so the two canvases always agree while one fades into the other). The mosaic is redrawn every 12
+  // so the two canvases always agree when one replaces the other). The mosaic is redrawn every 12
   // drawing-lengths (between 250 ms and 1.5 s, so it stays a small share of the main thread), and at
   // once if it has moved near the end of its overhang.
   const shiftOf = (m) => {
@@ -848,9 +847,7 @@
     const interval = clamp(cost * 12, 250, 1500);
     const far = Math.abs(dx) > MARGIN * 0.75 || Math.abs(dy) > MARGIN * 0.75;
     const due = moving && (time - mosaics[front].at) * 1000 >= interval;
-    if (dirty) drawMosaicLayer(0);
-    else if (far) drawMosaicLayer(150);
-    else if (due) drawMosaicLayer(Math.min(interval, 900));
+    if (dirty || far || due) drawMosaicLayer();
     mosaics.forEach((m) => {
       const [x, y] = shiftOf(m);
       m.c.style.transform = `translate3d(${x.toFixed(4)}px, ${y.toFixed(4)}px, 0)`;
