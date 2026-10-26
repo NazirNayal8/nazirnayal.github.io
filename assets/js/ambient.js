@@ -46,7 +46,7 @@
   };
   const mosaics = [0, 1].map(() => {
     const c = layer("ambient ambient-mosaic");
-    return { c, g: c.getContext("2d"), at: 0, scroll: 0 };
+    return { c, g: c.getContext("2d"), at: 0, ox: 0, oy: 0 };
   });
   const wordsCanvas = layer("ambient ambient-words");
   document.body.prepend(mosaics[0].c, mosaics[1].c, wordsCanvas);
@@ -187,7 +187,8 @@
 
   const LEVELS = 6;
   const buckets = Array.from({ length: LEVELS }, () => []);
-  const drawMosaic = () => {
+  // Draws the mosaic with the pattern's origin at (ox, oy), in CSS pixels.
+  const drawMosaic = (ox, oy) => {
     const s = edge;
     const cr = Math.cos(rotation);
     const sr = Math.sin(rotation);
@@ -197,8 +198,6 @@
     const ay = (a[0] * sr + a[1] * cr) * s;
     const bx = (b[0] * cr - b[1] * sr) * s;
     const by = (b[0] * sr + b[1] * cr) * s;
-    const ox = time * drift[0];
-    const oy = time * drift[1] - (window.scrollY || 0) * 0.06;
     const det = ax * by - ay * bx;
     const toLattice = (x, y) => [((x - ox) * by - (y - oy) * bx) / det, ((y - oy) * ax - (x - ox) * ay) / det];
     const corners = [toLattice(-MARGIN, -MARGIN), toLattice(width + MARGIN, -MARGIN), toLattice(-MARGIN, height + MARGIN), toLattice(width + MARGIN, height + MARGIN)];
@@ -775,13 +774,25 @@
   };
 
   /* ---------- Loop ---------- */
-  let mosaicRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+  // The mosaic stays on the screen's pixel grid, so its thin lines never shimmer as it moves: each
+  // canvas pixel covers a whole number of screen pixels (at most two canvas pixels per CSS pixel),
+  // the pattern is drawn at an origin rounded to a canvas pixel, and the layers move only by whole
+  // canvas pixels.
+  const gridRatio = () => {
+    const dpr = window.devicePixelRatio || 1;
+    return dpr / Math.ceil(dpr / 2);
+  };
+  let mosaicRatio = gridRatio();
+  const snap = (v) => Math.round(v * mosaicRatio) / mosaicRatio;
+  // Where the pattern's origin is now (its drift, and the parallax of scrolling), on the grid.
+  const anchor = () => [snap(time * drift[0]), snap(time * drift[1] - (window.scrollY || 0) * 0.06)];
   const sizeMosaics = () => {
     mosaics.forEach((m) => {
       m.c.width = Math.round((width + 2 * MARGIN) * mosaicRatio);
       m.c.height = Math.round((height + 2 * MARGIN) * mosaicRatio);
-      // Sized here rather than in CSS: the site's CSS minifier breaks calc().
-      Object.assign(m.c.style, { left: `${-MARGIN}px`, top: `${-MARGIN}px`, right: "auto", bottom: "auto", width: `${width + 2 * MARGIN}px`, height: `${height + 2 * MARGIN}px` });
+      // Sized here rather than in CSS (the site's CSS minifier breaks calc()), to exactly the canvas's
+      // pixels, so none is stretched.
+      Object.assign(m.c.style, { left: `${-MARGIN}px`, top: `${-MARGIN}px`, right: "auto", bottom: "auto", width: `${m.c.width / mosaicRatio}px`, height: `${m.c.height / mosaicRatio}px` });
       m.g.setTransform(mosaicRatio, 0, 0, mosaicRatio, MARGIN * mosaicRatio, MARGIN * mosaicRatio);
     });
     dirty = true;
@@ -790,6 +801,7 @@
     const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
+    mosaicRatio = gridRatio();
     sizeMosaics();
     wordsCanvas.width = Math.round(width * ratio);
     wordsCanvas.height = Math.round(height * ratio);
@@ -808,10 +820,12 @@
     const back = mosaics[1 - front];
     mctx = back.g;
     mctx.clearRect(-MARGIN, -MARGIN, width + 2 * MARGIN, height + 2 * MARGIN);
-    drawMosaic();
+    const [ox, oy] = anchor();
+    drawMosaic(ox, oy);
     quietCentre(mctx, -MARGIN, width + MARGIN);
     back.at = time;
-    back.scroll = window.scrollY || 0;
+    back.ox = ox;
+    back.oy = oy;
     mosaics.forEach((m) => {
       m.c.style.transition = fade ? `opacity ${fade}ms linear` : "none";
     });
@@ -821,10 +835,14 @@
     dirty = false;
     measuring = true;
   };
-  // Each canvas moves by the drift since it was drawn and by the parallax of any scrolling since. The
-  // mosaic is redrawn every 12 drawing-lengths (between 250 ms and 1.5 s, so it stays a small share of
-  // the main thread), and at once if it has moved near the end of its overhang.
-  const shiftOf = (m) => [drift[0] * (time - m.at), drift[1] * (time - m.at) - ((window.scrollY || 0) - m.scroll) * 0.06];
+  // Each canvas moves from where its pattern was drawn to where the pattern is now (both on the grid,
+  // so the two canvases always agree while one fades into the other). The mosaic is redrawn every 12
+  // drawing-lengths (between 250 ms and 1.5 s, so it stays a small share of the main thread), and at
+  // once if it has moved near the end of its overhang.
+  const shiftOf = (m) => {
+    const [ox, oy] = anchor();
+    return [ox - m.ox, oy - m.oy];
+  };
   const placeMosaic = (moving) => {
     const [dx, dy] = shiftOf(mosaics[front]);
     const interval = clamp(cost * 12, 250, 1500);
@@ -835,16 +853,16 @@
     else if (due) drawMosaicLayer(Math.min(interval, 900));
     mosaics.forEach((m) => {
       const [x, y] = shiftOf(m);
-      m.c.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+      m.c.style.transform = `translate3d(${x.toFixed(4)}px, ${y.toFixed(4)}px, 0)`;
     });
   };
   // Called with the length of the frame after a drawing. Where drawing stays slow, the mosaic drops
-  // to one canvas pixel per CSS pixel.
+  // to half its resolution (still a whole number of screen pixels per canvas pixel).
   const noteCost = (frameMs) => {
     measuring = false;
     cost = 0.6 * cost + 0.4 * Math.max(0, frameMs - 1000 / 60);
-    if (cost > 60 && mosaicRatio > 1) {
-      mosaicRatio = 1;
+    if (cost > 60 && mosaicRatio >= 1.5) {
+      mosaicRatio /= 2;
       sizeMosaics();
     }
   };
